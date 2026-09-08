@@ -1,0 +1,124 @@
+wsi:Research_Paper_CLAM rdf:type wsi:Research_Paper ; 
+wsi:hasPurpose "A high-throughput, data-efficient, interpretable weakly-supervised WSI-level classification method that requires only slide-level labels, supports multi-class subtyping, and enables domain adaptation and visualization through clustering-constrained attention pooling." ; 
+wsi:hasGithubRepo "https://github.com/mahmoodlab/CLAM" ; 
+wsi:hasMethodology wsi:CLAM_StepApplication_Patching ; 
+wsi:hasStepApplication wsi:CLAM_StepApplication_Patching ; 
+wsi:hasStepApplication wsi:CLAM_StepApplication_Feature_Extraction ; 
+wsi:hasStepApplication wsi:CLAM_StepApplication_Attention_Pooling ; 
+wsi:hasStepApplication wsi:CLAM_StepApplication_Clustering ; 
+wsi:hasStepApplication wsi:CLAM_StepApplication_Slide_Level_Classification .
+
+wsi:CLAM_StepApplication_Patching rdf:type wsi:Step_Application ; 
+wsi:ofStep wsi:Patch_Extraction ; 
+wsi:hasInputData wsi:Whole_Slide_Image ; 
+wsi:hasOutputData wsi:Tissue_Patches ; 
+wsi:usesAlgorithm wsi:Patch_Extraction_Algorithm ; 
+wsi:nextStepApplication wsi:CLAM_StepApplication_Feature_Extraction .
+
+wsi:CLAM_StepApplication_Feature_Extraction rdf:type wsi:Step_Application ; 
+wsi:ofStep wsi:Feature_Extraction ; 
+wsi:hasInputData wsi:Tissue_Patches ; 
+wsi:hasOutputData wsi:Patch_Feature_Embeddings ; 
+wsi:usesAlgorithm wsi:ResNet50_Feature_Extraction ; 
+wsi:nextStepApplication wsi:CLAM_StepApplication_Attention_Pooling .
+
+wsi:CLAM_StepApplication_Attention_Pooling rdf:type wsi:Step_Application ; 
+wsi:ofStep wsi:Attention_Pooling ; 
+wsi:hasInputData wsi:Patch_Feature_Embeddings ; 
+wsi:hasOutputData wsi:Slide_Level_Feature_Representations ; 
+wsi:usesAlgorithm wsi:Multi_Class_Attention_Pooling ; 
+wsi:nextStepApplication wsi:CLAM_StepApplication_Clustering .
+
+wsi:CLAM_StepApplication_Clustering rdf:type wsi:Step_Application ; 
+wsi:ofStep wsi:Instance_Level_Clustering ; 
+wsi:hasInputData wsi:Patch_Feature_Embeddings ; 
+wsi:hasOutputData wsi:Cluster_Assignment_Predictions ; 
+wsi:usesAlgorithm wsi:Instance_Level_Clustering_Algorithm ; 
+wsi:nextStepApplication wsi:CLAM_StepApplication_Slide_Level_Classification .
+
+wsi:CLAM_StepApplication_Slide_Level_Classification rdf:type wsi:Step_Application ; 
+wsi:ofStep wsi:Slide_Level_Classification ; 
+wsi:hasInputData wsi:Slide_Level_Feature_Representations ; 
+wsi:hasOutputData wsi:Slide_Level_Predictions ; 
+wsi:usesAlgorithm wsi:Slide_Level_Classifier ; 
+wsi:nextStepApplication wsi:CLAM_StepApplication_Patching .
+
+wsi:Patch_Extraction rdf:type wsi:WSI_Step ; 
+wsi:belongsToStage wsi:Stage_Patching .
+
+wsi:Feature_Extraction rdf:type wsi:WSI_Step ; 
+wsi:belongsToStage wsi:Stage_Feature_Extraction .
+
+wsi:Attention_Pooling rdf:type wsi:WSI_Step ; 
+wsi:belongsToStage wsi:Stage_Aggregation .
+
+wsi:Instance_Level_Clustering rdf:type wsi:WSI_Step ; 
+wsi:belongsToStage wsi:Stage_Aggregation .
+
+wsi:Slide_Level_Classification rdf:type wsi:WSI_Step ; 
+wsi:belongsToStage wsi:Stage_Aggregation .
+
+wsi:Patch_Extraction_Algorithm rdf:type wsi:Algorithm ; 
+wsi:hasParameter wsi:Patch_Size_256 ; 
+wsi:hasParameter wsi:Patch_Magnification_20x ; 
+wsi:hasParameter wsi:Patch_Overlap_0 .
+
+wsi:ResNet50_Feature_Extraction rdf:type wsi:Algorithm ; 
+wsi:hasParameter wsi:ResNet50_Pretrained_ImageNet ; 
+wsi:hasParameter wsi:Feature_Dimension_1024 ; 
+wsi:hasParameter wsi:Pooling_Adaptive_Mean_Spatial .
+
+wsi:Multi_Class_Attention_Pooling rdf:type wsi:Algorithm ; 
+wsi:hasParameter wsi:Attention_Branches_n ; 
+wsi:hasParameter wsi:Attention_Head_Dim_256 ; 
+wsi:hasParameter wsi:Attention_Weight_Dim_512 ; 
+wsi:hasParameter wsi:Attention_Score_Normalization_Softmax .
+
+wsi:Instance_Level_Clustering_Algorithm rdf:type wsi:Algorithm ; 
+wsi:hasParameter wsi:Clustering_Units_512 ; 
+wsi:hasParameter wsi:Cluster_Pseudo_Labels_B ; 
+wsi:hasParameter wsi:Cluster_Pseudo_Labels_B_8 ; 
+wsi:hasParameter wsi:Cluster_Mutual_Exclusivity_Assumption_Yes .
+
+wsi:Slide_Level_Classifier rdf:type wsi:Algorithm ; 
+wsi:hasParameter wsi:Classifier_Head_Dim_512 ; 
+wsi:hasParameter wsi:Classifier_Output_Dim_n ; 
+wsi:hasParameter wsi:Classifier_Activation_Softmax .
+
+wsi:Whole_Slide_Image rdf:type wsi:Data_Content ; 
+wsi:storedInFormat wsi:SVS .
+
+wsi:Tissue_Patches rdf:type wsi:Data_Content ; 
+wsi:storedInFormat wsi:H5 .
+
+wsi:Patch_Feature_Embeddings rdf:type wsi:Data_Content ; 
+wsi:storedInFormat wsi:H5 .
+
+wsi:Slide_Level_Feature_Representations rdf:type wsi:Data_Content ; 
+wsi:storedInFormat wsi:H5 .
+
+wsi:Cluster_Assignment_Predictions rdf:type wsi:Data_Content ; 
+wsi:storedInFormat wsi:H5 .
+
+wsi:Slide_Level_Predictions rdf:type wsi:Data_Content ; 
+wsi:storedInFormat wsi:H5 .
+
+wsi:SVS rdf:type wsi:Data_Format .
+wsi:H5 rdf:type wsi:Data_Format .
+wsi:Patch_Size_256 rdf:type wsi:Parameter .
+wsi:Patch_Magnification_20x rdf:type wsi:Parameter .
+wsi:Patch_Overlap_0 rdf:type wsi:Parameter .
+wsi:ResNet50_Pretrained_ImageNet rdf:type wsi:Parameter .
+wsi:Feature_Dimension_1024 rdf:type wsi:Parameter .
+wsi:Pooling_Adaptive_Mean_Spatial rdf:type wsi:Parameter .
+wsi:Attention_Branches_n rdf:type wsi:Parameter .
+wsi:Attention_Head_Dim_256 rdf:type wsi:Parameter .
+wsi:Attention_Weight_Dim_512 rdf:type wsi:Parameter .
+wsi:Attention_Score_Normalization_Softmax rdf:type wsi:Parameter .
+wsi:Clustering_Units_512 rdf:type wsi:Parameter .
+wsi:Cluster_Pseudo_Labels_B rdf:type wsi:Parameter .
+wsi:Cluster_Pseudo_Labels_B_8 rdf:type wsi:Parameter .
+wsi:Cluster_Mutual_Exclusivity_Assumption_Yes rdf:type wsi:Parameter .
+wsi:Classifier_Head_Dim_512 rdf:type wsi:Parameter .
+wsi:Classifier_Output_Dim_n rdf:type wsi:Parameter .
+wsi:Classifier_Activation_Softmax rdf:type wsi:Parameter .

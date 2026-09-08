@@ -1,0 +1,49 @@
+wsi:Research_Paper_CLAM rdf:type wsi:Research_Paper ;
+    wsi:hasPurpose "to solve weakly supervised classification tasks in computational pathology, in which each WSI in the training set is a single data point with a known slide-level diagnosis but for which no classspecific information or annotation is available for any pixel or region in the slide." ;
+    wsi:hasGithubRepo "https://github.com/mahmoodlab/CLAM" ;
+    wsi:hasMethodology wsi:Patch_Extraction .
+
+wsi:Patch_Extraction rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:SVS ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:Segmentation_Mask ;
+    wsi:hasOutputFormat wsi:Human_Readable_Text_File ;
+    wsi:usesAlgorithm wsi:Patching_Algorithm ;
+    wsi:nextStep wsi:Feature_Extraction .
+
+wsi:Feature_Extraction rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:1024_Feature_Embedding ;
+    wsi:usesAlgorithm wsi:ResNet50_Feature_Extraction ;
+    wsi:nextStep wsi:Aggregation .
+
+wsi:Patching_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:WSI_Downsampled_32x ;
+    wsi:hasParameter wsi:WSI_Converted_HSV ;
+    wsi:hasParameter wsi:Median_Blurring ;
+    wsi:hasParameter wsi:Morpohlogical_Closing ;
+    wsi:hasParameter wsi:Patch_Size_256x256 ;
+    wsi:hasParameter wsi:Patch_Magnification_20x_to_40x .
+
+wsi:ResNet50_Feature_Extraction rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Pretrained_ImageNet ;
+    wsi:hasParameter wsi:Adaptive_Mean_Spatial_Pooling ;
+    wsi:hasParameter wsi:Residual_Block_3rd ;
+    wsi:hasParameter wsi:Batch_Size_128_per_GPU .
+
+wsi:SVS rdf:type wsi:Data_Format .
+wsi:H5 rdf:type wsi:Data_Format .
+wsi:Segmentation_Mask rdf:type wsi:Data_Format  .
+wsi:Human_Readable_Text_File rdf:type wsi:Data_Format  .
+wsi:1024_Feature_Embedding rdf:type wsi:Data_Format ;
+
+wsi:WSI_Downsampled_32x  rdf:type wsi:Parameter .
+wsi:WSI_Converted_HSV rdf:type wsi:Parameter .
+wsi:Median_Blurring rdf:type wsi:Parameter .
+wsi:Morpohlogical_Closing rdf:type wsi:Parameter .
+wsi:Patch_Size_256x256 rdf:type wsi:Parameter .
+wsi:Patch_Magnification_20x_to_40x rdf:type wsi:Parameter .
+wsi:Pretrained_ImageNet rdf:type wsi:Parameter .
+wsi:Adaptive_Mean_Spatial_Pooling rdf:type wsi:Parameter .
+wsi:Residual_Block_3rd rdf:type wsi:Parameter .
+wsi:Batch_Size_128_per_GPU rdf:type wsi:Parameter .

@@ -1,0 +1,132 @@
+wsi:Research_Paper_CLAM rdf:type wsi:Research_Paper ;
+    wsi:hasPurpose "To develop a high-throughput deep learning framework (CLAM) for weakly-supervised multi-class classification of whole slide images (WSI) in computational pathology using attention-based pooling and instance-level clustering to improve model interpretability and performance." ;
+    wsi:hasGithubRepo "https://github.com/mahmoodlab/CLAM" ;
+    wsi:hasMethodology wsi:Segmentation .
+
+wsi:Segmentation rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:SVS ;
+    wsi:hasOutputFormat wsi:Mask ;
+    wsi:usesAlgorithm wsi:HSV_Thresholding ;
+    wsi:nextStep wsi:Patching .
+
+wsi:Patching rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:Mask ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Exhaustive_Cropping ;
+    wsi:hasParameter wsi:Patch_Size_256x256 ;
+    wsi:nextStep wsi:Feature_Extraction .
+
+wsi:Feature_Extraction rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:ResNet50_Feature_Extraction ;
+    wsi:hasParameter wsi:Batch_Size_128 ;
+    wsi:hasParameter wsi:Adaptive_Mean_Spatial_Pooling ;
+    wsi:hasParameter wsi:Residual_Block_3 ;
+    wsi:nextStep wsi:Classification .
+
+wsi:Classification rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:Prediction ;
+    wsi:usesAlgorithm wsi:Attention_Based_Pooling ;
+    wsi:hasParameter wsi:Multi_Class_Attention ;
+    wsi:hasParameter wsi:Attention_Network_Weights ;
+    wsi:hasParameter wsi:Weighted_Average_Aggregation ;
+    wsi:nextStep wsi:Clustering .
+
+wsi:Clustering rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:Cluster_Labels ;
+    wsi:usesAlgorithm wsi:Instance_Level_Clustering ;
+    wsi:hasParameter wsi:Cluster_Batch_Size_8 ;
+    wsi:hasParameter wsi:Mutual_Exclusivity_Assumption ;
+    wsi:hasParameter wsi:Pseudo_Label_Generation ;
+    wsi:nextStep wsi:Loss_Computation .
+
+wsi:Loss_Computation rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:Cluster_Labels ;
+    wsi:hasOutputFormat wsi:Loss ;
+    wsi:usesAlgorithm wsi:Smooth_SVM_Loss ;
+    wsi:hasParameter wsi:Margin_Alpha_1_0 ;
+    wsi:hasParameter wsi:Temperature_Tau_1_0 ;
+    wsi:nextStep wsi:Training .
+
+wsi:Training rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:Loss ;
+    wsi:hasOutputFormat wsi:Model ;
+    wsi:usesAlgorithm wsi:Adam_Optimizer ;
+    wsi:hasParameter wsi:Learning_Rate_2e-4 ;
+    wsi:hasParameter wsi:L2_Weight_Decay_1e-5 ;
+    wsi:hasParameter wsi:Batch_Size_1 ;
+    wsi:hasParameter wsi:Early_Stopping_20_Epochs ;
+    wsi:hasParameter wsi:Max_Epochs_200 ;
+    wsi:hasParameter wsi:Class_Imbalance_Sampling ;
+    wsi:hasParameter wsi:Loss_Scaling_c1_0_7_c2_0_3 .
+
+wsi:HSV_Thresholding rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Median_Blur ;
+    wsi:hasParameter wsi:Morphological_Closing .
+
+wsi:Exhaustive_Cropping rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Patch_Size_256x256 ;
+    wsi:hasParameter wsi:Downsampled_Resolution_32x .
+
+wsi:ResNet50_Feature_Extraction rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Pretrained_ImageNet ;
+    wsi:hasParameter wsi:Adaptive_Mean_Spatial_Pooling ;
+    wsi:hasParameter wsi:Residual_Block_3 ;
+    wsi:hasParameter wsi:Batch_Size_128 .
+
+wsi:Attention_Based_Pooling rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Multi_Class_Attention ;
+    wsi:hasParameter wsi:Attention_Network_Weights ;
+    wsi:hasParameter wsi:Weighted_Average_Aggregation .
+
+wsi:Instance_Level_Clustering rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Cluster_Batch_Size_8 ;
+    wsi:hasParameter wsi:Mutual_Exclusivity_Assumption ;
+    wsi:hasParameter wsi:Pseudo_Label_Generation .
+
+wsi:Smooth_SVM_Loss rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Margin_Alpha_1_0 ;
+    wsi:hasParameter wsi:Temperature_Tau_1_0 .
+
+wsi:Adam_Optimizer rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Learning_Rate_2e-4 ;
+    wsi:hasParameter wsi:L2_Weight_Decay_1e-5 ;
+    wsi:hasParameter wsi:Batch_Size_1 ;
+    wsi:hasParameter wsi:Early_Stopping_20_Epochs ;
+    wsi:hasParameter wsi:Max_Epochs_200 ;
+    wsi:hasParameter wsi:Class_Imbalance_Sampling ;
+    wsi:hasParameter wsi:Loss_Scaling_c1_0_7_c2_0_3 .
+
+wsi:SVS rdf:type wsi:Data_Format .
+wsi:Mask rdf:type wsi:Data_Format .
+wsi:H5 rdf:type wsi:Data_Format .
+wsi:Prediction rdf:type wsi:Data_Format .
+wsi:Cluster_Labels rdf:type wsi:Data_Format .
+wsi:Loss rdf:type wsi:Data_Format .
+wsi:Model rdf:type wsi:Data_Format .
+
+wsi:Patch_Size_256x256 rdf:type wsi:Parameter .
+wsi:Batch_Size_128 rdf:type wsi:Parameter .
+wsi:Adaptive_Mean_Spatial_Pooling rdf:type wsi:Parameter .
+wsi:Residual_Block_3 rdf:type wsi:Parameter .
+wsi:Multi_Class_Attention rdf:type wsi:Parameter .
+wsi:Attention_Network_Weights rdf:type wsi:Parameter .
+wsi:Weighted_Average_Aggregation rdf:type wsi:Parameter .
+wsi:Cluster_Batch_Size_8 rdf:type wsi:Parameter .
+wsi:Mutual_Exclusivity_Assumption rdf:type wsi:Parameter .
+wsi:Pseudo_Label_Generation rdf:type wsi:Parameter .
+wsi:Margin_Alpha_1_0 rdf:type wsi:Parameter .
+wsi:Temperature_Tau_1_0 rdf:type wsi:Parameter .
+wsi:Learning_Rate_2e-4 rdf:type wsi:Parameter .
+wsi:L2_Weight_Decay_1e-5 rdf:type wsi:Parameter .
+wsi:Batch_Size_1 rdf:type wsi:Parameter .
+wsi:Early_Stopping_20_Epochs rdf:type wsi:Parameter .
+wsi:Max_Epochs_200 rdf:type wsi:Parameter .
+wsi:Class_Imbalance_Sampling rdf:type wsi:Parameter .
+wsi:Loss_Scaling_c1_0_7_c2_0_3 rdf:type wsi:Parameter .
+wsi:Median_Blur rdf:type wsi:Parameter .
+wsi:Morphological_Closing rdf:type wsi:Parameter .
+wsi:Downsampled_Resolution_32x rdf:type wsi:Parameter .

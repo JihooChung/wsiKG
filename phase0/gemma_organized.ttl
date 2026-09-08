@@ -1,0 +1,37 @@
+@prefix rdfs: http://www.w3.org/2000/01/rdf-schema# . 
+@prefix rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns# . 
+@prefix owl: http://www.w3.org/2002/07/owl# . 
+@prefix xsd: http://www.w3.org/2001/XMLSchema# . 
+@prefix wsi: http://example.org/wsi-workflow# .
+
+wsi:CLAM_Paper rdf:type wsi:Research_Paper ; 
+     wsi:hasPurpose "solve weakly-supervised classification tasks in computational pathology" ; 
+     wsi:hasGithubRepo https://github.com/mahmoodlab/CLAM ; 
+     wsi:hasMethodology wsi:Segmentation .
+
+wsi:Segmentation rdf:type wsi:WSI_Step ; 
+     wsi:usesAlgorithm wsi:HSV_Thresholding_and_Morphological_Closing ; 
+     wsi:nextStep wsi:Patching .
+
+wsi:Patching rdf:type wsi:WSI_Step ; 
+     wsi:hasOutputFormat wsi:HDF5 ; 
+     wsi:nextStep wsi:Feature_Extraction .
+
+wsi:Feature_Extraction rdf:type wsi:WSI_Step ; 
+     wsi:usesAlgorithm wsi:ResNet50_ImageNet_Pretrained ; 
+     wsi:hasInputFormat wsi:HDF5 .
+     
+wsi:HSV_Thresholding_and_Morphological_Closing rdf:type wsi:Algorithm ; 
+     wsi:hasParameter wsi:downsampled_resolution_32x .
+
+wsi:ResNet50_ImageNet_Pretrained rdf:type wsi:Algorithm ; 
+     wsi:hasParameter wsi:patch_size_256x256 ; 
+     wsi:hasParameter wsi:batch_size_128 ; 
+     wsi:hasParameter wsi:adaptive_mean_spatial_pooling .
+
+wsi:HDF5 rdf:type wsi:Data_Format .
+
+wsi:downsampled_resolution_32x rdf:type wsi:Parameter .
+wsi:patch_size_256x256 rdf:type wsi:Parameter . 
+wsi:batch_size_128 rdf:type wsi:Parameter . 
+wsi:adaptive_mean_spatial_pooling rdf:type wsi:Parameter . 

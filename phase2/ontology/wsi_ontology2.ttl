@@ -1,0 +1,69 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wsi: <http://example.org/wsi-workflow#> .
+
+### --------------------------------------------------
+### 1. Entity Types (Classes)
+### --------------------------------------------------
+
+wsi:Research_Paper rdf:type owl:Class ;
+    rdfs:label "Research Paper" .
+
+wsi:WSI_Step rdf:type owl:Class ;
+    rdfs:label "WSI Processing Step" .
+
+wsi:Algorithm rdf:type owl:Class ;
+    rdfs:label "Algorithm or Model" .
+
+wsi:Parameter rdf:type owl:Class ;
+    rdfs:label "Hyperparameter or Configuration" .
+
+wsi:Data_Content rdf:type owl:Class ;
+    rdfs:label "Data Content" .
+
+wsi:Data_Format rdf:type owl:Class ;
+    rdfs:label "File Format" .
+
+
+### --------------------------------------------------
+### 2. Relation Types (Properties)
+### --------------------------------------------------
+
+
+wsi:hasPurpose rdf:type owl:DatatypeProperty ;
+    rdfs:domain wsi:Research_Paper ;
+    rdfs:range xsd:string .
+
+wsi:hasGithubRepo rdf:type owl:DatatypeProperty ;
+    rdfs:domain wsi:Research_Paper ;
+    rdfs:range xsd:anyURI .
+
+wsi:hasMethodology rdf:type owl:ObjectProperty ;
+    rdfs:domain wsi:Research_Paper ;
+    rdfs:range wsi:WSI_Step .
+
+wsi:nextStep rdf:type owl:ObjectProperty ;
+    rdfs:domain wsi:WSI_Step ;
+    rdfs:range wsi:WSI_Step .
+
+wsi:usesAlgorithm rdf:type owl:ObjectProperty ;
+    rdfs:domain wsi:WSI_Step ;
+    rdfs:range wsi:Algorithm .
+
+wsi:hasParameter rdf:type owl:ObjectProperty ;
+    rdfs:domain wsi:Algorithm ;
+    rdfs:range wsi:Parameter .
+
+wsi:hasInputData rdf:type owl:ObjectProperty ;
+    rdfs:domain wsi:WSI_Step ;
+    rdfs:range wsi:Data_Content .
+
+wsi:hasOutputData rdf:type owl:ObjectProperty ;
+    rdfs:domain wsi:WSI_Step ;
+    rdfs:range wsi:Data_Content .
+
+wsi:storedInFormat rdf:type owl:ObjectProperty ;
+    rdfs:domain wsi:Data_Content ;
+    rdfs:range wsi:Data_Format .

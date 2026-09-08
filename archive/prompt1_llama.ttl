@@ -1,0 +1,54 @@
+<http://example.org/wsi-workflow#Research_Paper_1>
+    a wsi:Research_Paper ;
+    rdfs:label "CLAM" ;
+    wsi:hasPurpose "High-throughput deep learning empowered toolbox for weakly-supervised classification tasks in computational pathology" ;
+    wsi:hasGithubRepo <https://github.com/mahmoodlab/CLAM> .
+
+<http://example.org/wsi-workflow#WSI_Step_1>
+    a wsi:WSI_Step ;
+    rdfs:label "WSI Processing" ;
+    wsi:nextStep <http://example.org/wsi-workflow#WSI_Step_2> ;
+    wsi:usesAlgorithm <http://example.org/wsi-workflow#Algorithm_1> ;
+    wsi:hasInputFormat wsi:SVS ;
+    wsi:hasOutputFormat wsi:H5 .
+
+<http://example.org/wsi-workflow#WSI_Step_2>
+    a wsi:WSI_Step ;
+    rdfs:label "Feature Extraction" ;
+    wsi:nextStep <http://example.org/wsi-workflow#WSI_Step_3> ;
+    wsi:usesAlgorithm <http://example.org/wsi-workflow#Algorithm_2> ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 .
+
+<http://example.org/wsi-workflow#WSI_Step_3>
+    a wsi:WSI_Step ;
+    rdfs:label "Classification" ;
+    wsi:usesAlgorithm <http://example.org/wsi-workflow#Algorithm_3> ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 .
+
+<http://example.org/wsi-workflow#Algorithm_1>
+    a wsi:Algorithm ;
+    rdfs:label "Segmentation" ;
+    wsi:hasParameter "threshold=0.5" ;
+    wsi:hasParameter "morphological_closing=true" .
+
+<http://example.org/wsi-workflow#Algorithm_2>
+    a wsi:Algorithm ;
+    rdfs:label "ResNet50" ;
+    wsi:hasParameter "patch_size=256" ;
+    wsi:hasParameter "batch_size=128" .
+
+<http://example.org/wsi-workflow#Algorithm_3>
+    a wsi:Algorithm ;
+    rdfs:label "Softmax" ;
+    wsi:hasParameter "temperature=1.0" ;
+    wsi:hasParameter "margin=1.0" .
+
+<http://example.org/wsi-workflow#Data_Format_1>
+    a wsi:Data_Format ;
+    rdfs:label "SVS" .
+
+<http://example.org/wsi-workflow#Data_Format_2>
+    a wsi:Data_Format ;
+    rdfs:label "H5" .

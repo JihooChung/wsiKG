@@ -1,0 +1,111 @@
+wsi:Research_Paper_CLAM rdf:type wsi:Research_Paper ;
+    wsi:hasPurpose "To develop a high-throughput deep learning framework, CLAM, for weakly-supervised multi-class classification in computational pathology using whole slide images (WSIs) with slide-level labels but no pixel-level annotations, leveraging attention-based pooling and instance-level clustering to improve model interpretability and performance." ;
+    wsi:hasGithubRepo "https://github.com/mahmoodlab/CLAM" ;
+    wsi:hasMethodology wsi:Segmentation .
+
+wsi:Segmentation rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:SVS ;
+    wsi:hasOutputFormat wsi:Mask ;
+    wsi:usesAlgorithm wsi:HSV_Thresholding ;
+    wsi:nextStep wsi:Patching .
+
+wsi:Patching rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:Mask ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Exhaustive_Cropping ;
+    wsi:hasParameter wsi:patch_size_256 ;
+    wsi:nextStep wsi:Feature_Extraction .
+
+wsi:Feature_Extraction rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:ResNet50 ;
+    wsi:hasParameter wsi:pretrained_ImageNet ;
+    wsi:hasParameter wsi:adaptive_mean_pooling ;
+    wsi:hasParameter wsi:batch_size_128 ;
+    wsi:nextStep wsi:Classification .
+
+wsi:Classification rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:Prediction ;
+    wsi:usesAlgorithm wsi:CLAM_Attention_Pooling ;
+    wsi:hasParameter wsi:multi_class_attention ;
+    wsi:hasParameter wsi:attention_backbone_shared ;
+    wsi:hasParameter wsi:parallel_attention_branches ;
+    wsi:hasParameter wsi:weighted_average_aggregation ;
+    wsi:hasParameter wsi:slide_level_prediction ;
+    wsi:nextStep wsi:Instance_Clustering .
+
+wsi:Instance_Clustering rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:Cluster_Labels ;
+    wsi:usesAlgorithm wsi:Instance_Level_Clustering ;
+    wsi:hasParameter wsi:mutual_exclusivity_assumption ;
+    wsi:hasParameter wsi:top_B_patches ;
+    wsi:hasParameter wsi:bottom_B_patches ;
+    wsi:hasParameter wsi:positive_evidence_label ;
+    wsi:hasParameter wsi:negative_evidence_label ;
+    wsi:hasParameter wsi:false_positive_evidence_label ;
+    wsi:nextStep wsi:Smooth_SVM_Loss .
+
+wsi:Smooth_SVM_Loss rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:Cluster_Labels ;
+    wsi:hasOutputFormat wsi:Loss_Value ;
+    wsi:usesAlgorithm wsi:Smooth_Top1_SVM_Loss ;
+    wsi:hasParameter wsi:margin_alpha_1_0 ;
+    wsi:hasParameter wsi:temperature_tau_1_0 ;
+    wsi:nextStep wsi:Training .
+
+wsi:Training rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:Loss_Value ;
+    wsi:hasOutputFormat wsi:Trained_Model ;
+    wsi:usesAlgorithm wsi:Adam_Optimizer ;
+    wsi:hasParameter wsi:learning_rate_2e-4 ;
+    wsi:hasParameter wsi:L2_weight_decay_1e-5 ;
+    wsi:hasParameter wsi:batch_size_1 ;
+    wsi:hasParameter wsi:multinomial_sampling_inverse_frequency ;
+    wsi:hasParameter wsi:early_stopping_20_epochs ;
+    wsi:hasParameter wsi:max_epochs_200 ;
+    wsi:hasParameter wsi:total_loss_weight_c1_0_7 ;
+    wsi:hasParameter wsi:total_loss_weight_c2_0_3 ;
+    wsi:nextStep wsi:Model_Selection .
+
+wsi:Model_Selection rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:Trained_Model ;
+    wsi:hasOutputFormat wsi:Best_Model ;
+    wsi:usesAlgorithm wsi:Validation_Loss_Monitoring ;
+    wsi:hasParameter wsi:monitor_validation_loss ;
+    wsi:hasParameter wsi:save_lowest_loss_model ;
+    wsi:nextStep wsi:Visualization .
+
+wsi:Visualization rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:Best_Model ;
+    wsi:hasOutputFormat wsi:Heatmap ;
+    wsi:usesAlgorithm wsi:Attention_Heatmap_Generation ;
+    wsi:hasParameter wsi:percentile_normalization ;
+    wsi:hasParameter wsi:diverging_colormap ;
+    wsi:hasParameter wsi:transparency_0_5 ;
+    wsi:hasParameter wsi:overlap_95_percent ;
+    wsi:nextStep wsi:Comparative_Analysis .
+
+wsi:Comparative_Analysis rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:Best_Model ;
+    wsi:hasOutputFormat wsi:Performance_Comparison ;
+    wsi:usesAlgorithm wsi:Binary_MIL ;
+    wsi:hasParameter wsi:max_pooling_aggregation ;
+    wsi:hasParameter wsi:one_vs_rest_classifiers ;
+    wsi:nextStep wsi:Multi_Class_MIL .
+
+wsi:Multi_Class_MIL rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:Best_Model ;
+    wsi:hasOutputFormat wsi:Performance_Comparison ;
+    wsi:usesAlgorithm wsi:Multi_Class_MIL ;
+    wsi:hasParameter wsi:max_pooling_aggregation ;
+    wsi:hasParameter wsi:multi_class_classification_layer ;
+    wsi:nextStep wsi:End .
+
+wsi:End rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:Performance_Comparison ;
+    wsi:hasOutputFormat wsi:Final_Result ;
+    wsi:usesAlgorithm wsi:None ;
+    wsi:nextStep wsi:None .

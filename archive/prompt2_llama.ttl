@@ -1,0 +1,118 @@
+wsi:Research_Paper_CLAM rdf:type wsi:Research_Paper ;
+    wsi:hasPurpose "CLAM is a high-throughput deep learning empowered toolbox designed to solve weakly-supervised classification tasks in computational pathology." ;
+    wsi:hasGithubRepo "https://github.com/mahmoodlab/CLAM" ;
+    wsi:hasMethodology wsi:WSI_Step_Patching .
+
+wsi:WSI_Step_Patching rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:SVS ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_ResNet50 ;
+    wsi:nextStep wsi:WSI_Step_Feature_Extraction .
+
+wsi:WSI_Step_Feature_Extraction rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_ResNet50 ;
+    wsi:nextStep wsi:WSI_Step_Instance_Level_Clustering .
+
+wsi:WSI_Step_Instance_Level_Clustering rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Instance_Level_Clustering ;
+    wsi:nextStep wsi:WSI_Step_Smooth_SVM_Loss .
+
+wsi:WSI_Step_Smooth_SVM_Loss rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Smooth_SVM_Loss ;
+    wsi:nextStep wsi:WSI_Step_Model_Selection .
+
+wsi:WSI_Step_Model_Selection rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Model_Selection ;
+    wsi:nextStep wsi:WSI_Step_Visualization .
+
+wsi:WSI_Step_Visualization rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Visualization ;
+    wsi:nextStep wsi:WSI_Step_Comparative_Analysis .
+
+wsi:WSI_Step_Comparative_Analysis rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Comparative_Analysis ;
+    wsi:nextStep wsi:WSI_Step_Multiple_Instance_Learning .
+
+wsi:WSI_Step_Multiple_Instance_Learning rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Multiple_Instance_Learning ;
+    wsi:nextStep wsi:WSI_Step_Multi_Class_Implementation .
+
+wsi:WSI_Step_Multi_Class_Implementation rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Multi_Class_Implementation ;
+    wsi:nextStep wsi:WSI_Step_Training_Details .
+
+wsi:WSI_Step_Training_Details rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Training_Details .
+
+wsi:Algorithm_ResNet50 rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Patch_Size_256 .
+
+wsi:Algorithm_Instance_Level_Clustering rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Instance_Level_Clustering .
+
+wsi:Algorithm_Smooth_SVM_Loss rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Smooth_SVM_Loss .
+
+wsi:Algorithm_Model_Selection rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Model_Selection .
+
+wsi:Algorithm_Visualization rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Visualization .
+
+wsi:Algorithm_Comparative_Analysis rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Comparative_Analysis .
+
+wsi:Algorithm_Multiple_Instance_Learning rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Multiple_Instance_Learning .
+
+wsi:Algorithm_Multi_Class_Implementation rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Multi_Class_Implementation .
+
+wsi:Algorithm_Training_Details rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Training_Details .
+
+wsi:Parameter_Patch_Size_256 rdf:type wsi:Parameter ;
+    wsi:hasValue "256" .
+
+wsi:Parameter_Instance_Level_Clustering rdf:type wsi:Parameter ;
+    wsi:hasValue "Instance-Level Clustering" .
+
+wsi:Parameter_Smooth_SVM_Loss rdf:type wsi:Parameter ;
+    wsi:hasValue "Smooth SVM Loss" .
+
+wsi:Parameter_Model_Selection rdf:type wsi:Parameter ;
+    wsi:hasValue "Model Selection" .
+
+wsi:Parameter_Visualization rdf:type wsi:Parameter ;
+    wsi:hasValue "Visualization" .
+
+wsi:Parameter_Comparative_Analysis rdf:type wsi:Parameter ;
+    wsi:hasValue "Comparative Analysis" .
+
+wsi:Parameter_Multiple_Instance_Learning rdf:type wsi:Parameter ;
+    wsi:hasValue "Multiple Instance Learning" .
+
+wsi:Parameter_Multi_Class_Implementation rdf:type wsi:Parameter ;
+    wsi:hasValue "Multi-Class Implementation" .
+
+wsi:Parameter_Training_Details rdf:type wsi:Parameter ;
+    wsi:hasValue "Training Details" .
+```

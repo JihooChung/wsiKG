@@ -1,0 +1,135 @@
+wsi:Research_Paper_CLAM rdf:type wsi:Research_Paper ;
+    wsi:hasPurpose "To present CLAM, a weakly-supervised deep learning method for WSI-level classification that requires only slide-level labels, is data-efficient, adaptable, and interpretable, while enabling multi-class subtyping and handling domain shift across diverse datasets." ;
+    wsi:hasGithubRepo "https://github.com/mahmoodlab/CLAM" ;
+    wsi:hasMethodology wsi:Patch_Extraction .
+
+wsi:Patch_Extraction rdf:type wsi:WSI_Step ;
+    wsi:hasInputData wsi:Whole_Slide_Image ;
+    wsi:hasOutputData wsi:Tissue_Patches ;
+    wsi:usesAlgorithm wsi:Patching_Algorithm ;
+    wsi:nextStep wsi:Feature_Extraction .
+
+wsi:Feature_Extraction rdf:type wsi:WSI_Step ;
+    wsi:hasInputData wsi:Tissue_Patches ;
+    wsi:hasOutputData wsi:1024_Feature_Embedding ;
+    wsi:usesAlgorithm wsi:ResNet50_Feature_Extraction ;
+    wsi:nextStep wsi:Attention_Pooling .
+
+wsi:Attention_Pooling rdf:type wsi:WSI_Step ;
+    wsi:hasInputData wsi:1024_Feature_Embedding ;
+    wsi:hasOutputData wsi:512_Dimensional_Slide_Level_Representation ;
+    wsi:usesAlgorithm wsi:Multi_Class_Attention_Pooling ;
+    wsi:nextStep wsi:Instance_Level_Clustering .
+
+wsi:Instance_Level_Clustering rdf:type wsi:WSI_Step ;
+    wsi:hasInputData wsi:512_Dimensional_Slide_Level_Representation ;
+    wsi:hasOutputData wsi:Cluster_Assignment_Predictions ;
+    wsi:usesAlgorithm wsi:Instance_Level_Clustering_Algorithm ;
+    wsi:nextStep wsi:Slide_Level_Classification .
+
+wsi:Slide_Level_Classification rdf:type wsi:WSI_Step ;
+    wsi:hasInputData wsi:512_Dimensional_Slide_Level_Representation ;
+    wsi:hasOutputData wsi:Slide_Level_Prediction ;
+    wsi:usesAlgorithm wsi:Multi_Class_Classifier ;
+    wsi:nextStep wsi:Visualization .
+
+wsi:Visualization rdf:type wsi:WSI_Step ;
+    wsi:hasInputData wsi:Slide_Level_Prediction ;
+    wsi:hasOutputData wsi:Attention_Heatmap ;
+    wsi:usesAlgorithm wsi:Attention_Heatmap_Generation ;
+    wsi:nextStep wsi:End .
+
+wsi:Patching_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Patch_Size_256x256 ;
+    wsi:hasParameter wsi:Patch_Magnification_20x ;
+    wsi:hasParameter wsi:Patch_Overlap_0 .
+
+wsi:ResNet50_Feature_Extraction rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Pretrained_ImageNet ;
+    wsi:hasParameter wsi:Adaptive_Mean_Spatial_Pooling ;
+    wsi:hasParameter wsi:Residual_Block_3rd ;
+    wsi:hasParameter wsi:Batch_Size_128_per_GPU .
+
+wsi:Multi_Class_Attention_Pooling rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Attention_Branches_n ;
+    wsi:hasParameter wsi:Attention_Weights_Wa ;
+    wsi:hasParameter wsi:Attention_Weights_Va ;
+    wsi:hasParameter wsi:Attention_Weights_Ua ;
+    wsi:hasParameter wsi:Weighted_Average_Sum ;
+    wsi:hasParameter wsi:Softmax_Normalization .
+
+wsi:Instance_Level_Clustering_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Clustering_Layer_512_Hidden_Units ;
+    wsi:hasParameter wsi:Cluster_Assignment_Scores ;
+    wsi:hasParameter wsi:Pseudo_Labels ;
+    wsi:hasParameter wsi:Top_B_Attended_Patches ;
+    wsi:hasParameter wsi:Bottom_B_Attended_Patches ;
+    wsi:hasParameter wsi:Mutual_Exclusivity_Assumption ;
+    wsi:hasParameter wsi:Smooth_SVM_Loss_Margin_1_0 ;
+    wsi:hasParameter wsi:Smooth_SVM_Loss_Temperature_1_0 .
+
+wsi:Multi_Class_Classifier rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Classifier_Weights_Wc ;
+    wsi:hasParameter wsi:Softmax_Normalization .
+
+wsi:Attention_Heatmap_Generation rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Attention_Score_Normalization ;
+    wsi:hasParameter wsi:Percentile_Score ;
+    wsi:hasParameter wsi:RGB_Color_Map ;
+    wsi:hasParameter wsi:Transparency_0_5 ;
+    wsi:hasParameter wsi:ROI_Tiling_256x256 ;
+    wsi:hasParameter wsi:Overlap_95 .
+
+wsi:Whole_Slide_Image rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:SVS .
+
+wsi:Tissue_Patches rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:1024_Feature_Embedding rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:512_Dimensional_Slide_Level_Representation rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:Cluster_Assignment_Predictions rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:Slide_Level_Prediction rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:Attention_Heatmap rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:PNG .
+
+wsi:SVS rdf:type wsi:Data_Format .
+wsi:H5 rdf:type wsi:Data_Format .
+wsi:PNG rdf:type wsi:Data_Format .
+
+wsi:Patch_Size_256x256 rdf:type wsi:Parameter .
+wsi:Patch_Magnification_20x rdf:type wsi:Parameter .
+wsi:Patch_Overlap_0 rdf:type wsi:Parameter .
+wsi:Pretrained_ImageNet rdf:type wsi:Parameter .
+wsi:Adaptive_Mean_Spatial_Pooling rdf:type wsi:Parameter .
+wsi:Residual_Block_3rd rdf:type wsi:Parameter .
+wsi:Batch_Size_128_per_GPU rdf:type wsi:Parameter .
+wsi:Attention_Branches_n rdf:type wsi:Parameter .
+wsi:Attention_Weights_Wa rdf:type wsi:Parameter .
+wsi:Attention_Weights_Va rdf:type wsi:Parameter .
+wsi:Attention_Weights_Ua rdf:type wsi:Parameter .
+wsi:Weighted_Average_Sum rdf:type wsi:Parameter .
+wsi:Softmax_Normalization rdf:type wsi:Parameter .
+wsi:Clustering_Layer_512_Hidden_Units rdf:type wsi:Parameter .
+wsi:Cluster_Assignment_Scores rdf:type wsi:Parameter .
+wsi:Pseudo_Labels rdf:type wsi:Parameter .
+wsi:Top_B_Attended_Patches rdf:type wsi:Parameter .
+wsi:Bottom_B_Attended_Patches rdf:type wsi:Parameter .
+wsi:Mutual_Exclusivity_Assumption rdf:type wsi:Parameter .
+wsi:Smooth_SVM_Loss_Margin_1_0 rdf:type wsi:Parameter .
+wsi:Smooth_SVM_Loss_Temperature_1_0 rdf:type wsi:Parameter .
+wsi:Classifier_Weights_Wc rdf:type wsi:Parameter .
+wsi:Attention_Score_Normalization rdf:type wsi:Parameter .
+wsi:Percentile_Score rdf:type wsi:Parameter .
+wsi:RGB_Color_Map rdf:type wsi:Parameter .
+wsi:Transparency_0_5 rdf:type wsi:Parameter .
+wsi:ROI_Tiling_256x256 rdf:type wsi:Parameter .
+wsi:Overlap_95 rdf:type wsi:Parameter .

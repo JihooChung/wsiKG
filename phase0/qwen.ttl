@@ -1,0 +1,77 @@
+<http://example.org/wsi-workflow#Research_Paper_CLAM> rdf:type wsi:Research_Paper ;
+    wsi:hasPurpose "High-throughput deep learning for weakly-supervised classification of whole slide images in computational pathology" ;
+    wsi:hasGithubRepo <https://github.com/mahmoodlab/CLAM> ;
+    wsi:hasMethodology <http://example.org/wsi-workflow#Segmentation> .
+
+<http://example.org/wsi-workflow#Segmentation> rdf:type wsi:WSI_Step ;
+    wsi:nextStep <http://example.org/wsi-workflow#Patching> ;
+    wsi:usesAlgorithm <http://example.org/wsi-workflow#OTSU_Thresholding> ;
+    wsi:hasInputFormat wsi:SVS ;
+    wsi:hasOutputFormat wsi:H5 .
+
+<http://example.org/wsi-workflow#Patching> rdf:type wsi:WSI_Step ;
+    wsi:nextStep <http://example.org/wsi-workflow#Feature_Extraction> ;
+    wsi:usesAlgorithm <http://example.org/wsi-workflow#Exhaustive_Cropping> ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 .
+
+<http://example.org/wsi-workflow#Feature_Extraction> rdf:type wsi:WSI_Step ;
+    wsi:usesAlgorithm <http://example.org/wsi-workflow#ResNet50> ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 .
+
+<http://example.org/wsi-workflow#OTSU_Thresholding> rdf:type wsi:Algorithm ;
+    wsi:hasParameter <http://example.org/wsi-workflow#Saturation_Thresholding> ;
+    wsi:hasParameter <http://example.org/wsi-workflow#Median_Blur_Kernel_Size_5> ;
+    wsi:hasParameter <http://example.org/wsi-workflow#Morphological_Closing> ;
+    wsi:hasParameter <http://example.org/wsi-workflow#Area_Threshold_1000> .
+
+<http://example.org/wsi-workflow#Exhaustive_Cropping> rdf:type wsi:Algorithm ;
+    wsi:hasParameter <http://example.org/wsi-workflow#Patch_Size_256x256> ;
+    wsi:hasParameter <http://example.org/wsi-workflow#Magnification_20x> ;
+    wsi:hasParameter <http://example.org/wsi-workflow#Magnification_40x> .
+
+<http://example.org/wsi-workflow#ResNet50> rdf:type wsi:Algorithm ;
+    wsi:hasParameter <http://example.org/wsi-workflow#Pretrained_ImageNet> ;
+    wsi:hasParameter <http://example.org/wsi-workflow#Adaptive_Mean_Spatial_Pooling> ;
+    wsi:hasParameter <http://example.org/wsi-workflow#Residual_Block_3> ;
+    wsi:hasParameter <http://example.org/wsi-workflow#Batch_Size_128> .
+
+<http://example.org/wsi-workflow#Saturation_Thresholding> rdf:type wsi:Parameter ;
+    rdfs:label "thresholding on saturation channel" .
+
+<http://example.org/wsi-workflow#Median_Blur_Kernel_Size_5> rdf:type wsi:Parameter ;
+    rdfs:label "median blur kernel size = 5" .
+
+<http://example.org/wsi-workflow#Morphological_Closing> rdf:type wsi:Parameter ;
+    rdfs:label "morphological closing to fill gaps" .
+
+<http://example.org/wsi-workflow#Area_Threshold_1000> rdf:type wsi:Parameter ;
+    rdfs:label "minimum area threshold = 1000 pixels" .
+
+<http://example.org/wsi-workflow#Patch_Size_256x256> rdf:type wsi:Parameter ;
+    rdfs:label "patch size = 256x256" .
+
+<http://example.org/wsi-workflow#Magnification_20x> rdf:type wsi:Parameter ;
+    rdfs:label "magnification = 20x" .
+
+<http://example.org/wsi-workflow#Magnification_40x> rdf:type wsi:Parameter ;
+    rdfs:label "magnification = 40x" .
+
+<http://example.org/wsi-workflow#Pretrained_ImageNet> rdf:type wsi:Parameter ;
+    rdfs:label "pretrained on ImageNet" .
+
+<http://example.org/wsi-workflow#Adaptive_Mean_Spatial_Pooling> rdf:type wsi:Parameter ;
+    rdfs:label "adaptive mean-spatial pooling after 3rd residual block" .
+
+<http://example.org/wsi-workflow#Residual_Block_3> rdf:type wsi:Parameter ;
+    rdfs:label "3rd residual block of ResNet50" .
+
+<http://example.org/wsi-workflow#Batch_Size_128> rdf:type wsi:Parameter ;
+    rdfs:label "batch size = 128 per GPU" .
+
+wsi:SVS rdf:type wsi:Data_Format ;
+    rdfs:label "SVS" .
+
+wsi:H5 rdf:type wsi:Data_Format ;
+    rdfs:label "H5" .

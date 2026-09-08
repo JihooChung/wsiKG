@@ -1,0 +1,116 @@
+wsi:Research_Paper_CLAM rdf:type wsi:Research_Paper ;
+    wsi:hasPurpose "CLAM is a high-throughput deep learning empowered toolbox designed to solve weakly-supervised classification tasks in computational pathology." ;
+    wsi:hasGithubRepo "https://github.com/mahmoodlab/CLAM" ;
+    wsi:hasMethodology wsi:WSI_Step_Patching .
+
+wsi:WSI_Step_Patching rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:SVS ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_ResNet50 ;
+    wsi:nextStep wsi:WSI_Step_Feature_Extraction .
+
+wsi:WSI_Step_Feature_Extraction rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_ResNet50 ;
+    wsi:nextStep wsi:WSI_Step_Instance_Level_Clustering .
+
+wsi:WSI_Step_Instance_Level_Clustering rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Instance_Level_Clustering ;
+    wsi:nextStep wsi:WSI_Step_Smooth_SVM_Loss .
+
+wsi:WSI_Step_Smooth_SVM_Loss rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Smooth_SVM_Loss ;
+    wsi:nextStep wsi:WSI_Step_Model_Selection .
+
+wsi:WSI_Step_Model_Selection rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Model_Selection ;
+    wsi:nextStep wsi:WSI_Step_Visualization .
+
+wsi:WSI_Step_Visualization rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Visualization ;
+    wsi:nextStep wsi:WSI_Step_Comparative_Analysis .
+
+wsi:WSI_Step_Comparative_Analysis rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Comparative_Analysis ;
+    wsi:nextStep wsi:WSI_Step_Data_Availability .
+
+wsi:WSI_Step_Data_Availability rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Data_Availability ;
+    wsi:nextStep wsi:WSI_Step_Code_Availability .
+
+wsi:WSI_Step_Code_Availability rdf:type wsi:WSI_Step ;
+    wsi:hasInputFormat wsi:H5 ;
+    wsi:hasOutputFormat wsi:H5 ;
+    wsi:usesAlgorithm wsi:Algorithm_Code_Availability ;
+    wsi:nextStep wsi:WSI_Step_End .
+
+wsi:Algorithm_ResNet50 rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Patch_Size ;
+    wsi:hasParameter wsi:Parameter_Batch_Size .
+
+wsi:Algorithm_Instance_Level_Clustering rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Instance_Level_Clustering .
+
+wsi:Algorithm_Smooth_SVM_Loss rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Smooth_SVM_Loss .
+
+wsi:Algorithm_Model_Selection rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Model_Selection .
+
+wsi:Algorithm_Visualization rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Visualization .
+
+wsi:Algorithm_Comparative_Analysis rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Comparative_Analysis .
+
+wsi:Algorithm_Data_Availability rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Data_Availability .
+
+wsi:Algorithm_Code_Availability rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Parameter_Code_Availability .
+
+wsi:Parameter_Patch_Size rdf:type wsi:Parameter ;
+    wsi:value 256 .
+
+wsi:Parameter_Batch_Size rdf:type wsi:Parameter ;
+    wsi:value 128 .
+
+wsi:Parameter_Instance_Level_Clustering rdf:type wsi:Parameter ;
+    wsi:value 8 .
+
+wsi:Parameter_Smooth_SVM_Loss rdf:type wsi:Parameter ;
+    wsi:value 1.0 .
+
+wsi:Parameter_Model_Selection rdf:type wsi:Parameter ;
+    wsi:value 20 .
+
+wsi:Parameter_Visualization rdf:type wsi:Parameter ;
+    wsi:value 2 .
+
+wsi:Parameter_Comparative_Analysis rdf:type wsi:Parameter ;
+    wsi:value 1 .
+
+wsi:Parameter_Data_Availability rdf:type wsi:Parameter ;
+    wsi:value 1 .
+
+wsi:Parameter_Code_Availability rdf:type wsi:Parameter ;
+    wsi:value 1 .
+
+wsi:Data_Format_SVS rdf:type wsi:Data_Format ;
+    wsi:format "SVS" .
+
+wsi:Data_Format_H5 rdf:type wsi:Data_Format ;
+    wsi:format "H5" .
