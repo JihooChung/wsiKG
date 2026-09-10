@@ -107,19 +107,3 @@ wsi:KMeans_Init_Prototypes rdf:type wsi:Parameter .
 wsi:Per_Prototype_Nonlinear_Mapping rdf:type wsi:Parameter .
 
 wsi:Structured_MLP_Architecture rdf:type wsi:Parameter .
------------------------------------------
-References:
-
-[RREF1] wsi_ontology3.ttl (0.466)
-### --------------------------------------------------
-### 3. Canonical Stage Individuals
-### --------------------------------------------------
-
-wsi:Stage_Patching rdf:type wsi:WSI_Stage ;
-    rdfs:label "Patching" .
-
-wsi:Stage_Feature_Extraction rdf:type wsi:WSI_Stage ;
-    rdfs:label "Feature Extraction" .
-
-wsi:Stage_Aggregation rdf:type wsi:WSI_Stage ;
-    rdfs:label "Aggregation" .

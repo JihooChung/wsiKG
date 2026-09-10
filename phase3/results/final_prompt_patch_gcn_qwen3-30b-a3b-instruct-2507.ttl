@@ -135,19 +135,3 @@ wsi:4_Hop_Neighborhood rdf:type wsi:Parameter .
 wsi:Dense_Connections rdf:type wsi:Parameter .
 
 wsi:Saturation_Channel_Binarization rdf:type wsi:Parameter .
------------------------------------------
-References:
-
-[RREF1] wsi_ontology3.ttl (0.462)
-### --------------------------------------------------
-### 3. Canonical Stage Individuals
-### --------------------------------------------------
-
-wsi:Stage_Patching rdf:type wsi:WSI_Stage ;
-    rdfs:label "Patching" .
-
-wsi:Stage_Feature_Extraction rdf:type wsi:WSI_Stage ;
-    rdfs:label "Feature Extraction" .
-
-wsi:Stage_Aggregation rdf:type wsi:WSI_Stage ;
-    rdfs:label "Aggregation" .
