@@ -1,0 +1,78 @@
+wsi:Research_Paper_TITAN rdf:type wsi:Research_Paper ;
+    wsi:hasPurpose "a multimodal whole slide foundation model pretrained using WSIs via visual self-supervised learning and vision-language alignment with corresponding pathology reports and synthetic captions generated from a multimodal generative AI copilot for pathology. " ;
+    wsi:hasGithubRepo "https://github.com/mahmoodlab/TITAN" ;
+    wsi:hasMethodology wsi:TITAN_Segmentation ;
+    wsi:hasStepApplication wsi:TITAN_Segmentation ;
+    wsi:hasStepApplication wsi:TITAN_Patch_Extraction ;
+    wsi:hasStepApplication wsi:TITAN_Feature_Extraction ;
+    wsi:hasStepApplication wsi:TITAN_Aggregation .
+
+wsi:TITAN_Segmentation rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Segmentation ;
+    wsi:hasInputData wsi:Whole_Slide_Image ;
+    wsi:hasOutputData wsi:Segmentation_Mask ;
+    wsi:usesAlgorithm wsi:CLAM_Segmentation_Algorithm ;
+    wsi:nextStepApplication wsi:TITAN_Patch_Extraction .
+
+wsi:TITAN_Patch_Extraction rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Patch_Extraction ;
+    wsi:hasInputData wsi:Whole_Slide_Image ;
+    wsi:hasOutputData wsi:Patches ;
+    wsi:usesAlgorithm wsi:CLAM_Patch_Extraction_Algorithm ;
+    wsi:nextStepApplication wsi:TITAN_Feature_Extraction .
+
+wsi:TITAN_Feature_Extraction rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Feature_Extraction ;
+    wsi:hasInputData wsi:Patches ;
+    wsi:hasOutputData wsi:Feature_Embedding ;
+    wsi:usesAlgorithm wsi:CONCH_v1_5 ;
+    wsi:nextStepApplication wsi:TITAN_Tissue_Grouping .
+
+wsi:TITAN_Aggregation rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Aggreation_with_Slide_Encoder ;
+    wsi:hasInputData wsi:Feature_Embedding ;
+    wsi:hasOutputData wsi:Slide_Representation ;
+    wsi:usesAlgorithm wsi:TITAN_Encoder .
+
+wsi:Segmentation rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Patching .
+
+wsi:Patch_Extraction rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Patching .
+
+wsi:Feature_Extraction rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Feature_Extraction .
+
+wsi:Aggreation_with_Slide_Encoder rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Aggregation .
+
+
+wsi:CLAM_Segmentation_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:HSV_Saturation_Thresholding ;
+    wsi:hasParameter wsi:Median_Blurring ;
+    wsi:hasParameter wsi:Morphological_Closing .
+
+wsi:CLAM_Patch_Extraction_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Patch_Size_512x512 ;
+    wsi:hasParameter wsi:Magnification_20x .
+
+wsi:CONCH_v1_5 rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Pretrained_CoCa .
+
+wsi:TITAN_Encoder rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Pretrained_WSIs ;
+    wsi:hasParameter wsi:ViT_Architecture .
+
+wsi:Whole_Slide_Image rdf:type wsi:Data_Content .
+wsi:Patches rdf:type wsi:Data_Content .
+wsi:Feature_Embedding rdf:type wsi:Data_Content .
+wsi:Slide_Representation rdf:type wsi:Data_Content .
+
+wsi:HSV_Saturation_Thresholding rdf:type wsi:Parameter .
+wsi:Median_Blurring rdf:type wsi:Parameter .
+wsi:Morphological_Closing rdf:type wsi:Parameter .
+wsi:Patch_Size_512x512 rdf:type wsi:Parameter .
+wsi:Magnification_20x rdf:type wsi:Parameter .
+wsi:Pretrained_CoCa rdf:type wsi:Parameter .
+wsi:Pretrained_WSIs rdf:type wsi:Parameter .
+wsi:ViT_Architecture rdf:type wsi:Parameter .

@@ -3,11 +3,12 @@ import requests
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--phase", type=str, default="phase2")
-parser.add_argument("--input_path", type=str, default="./data/{phase}/input.txt")
-parser.add_argument("--prompt_path", type=str, default="./{phase}/prompt/final_prompt.txt")
+parser.add_argument("--phase", type=str, default="phase3")
 parser.add_argument("--model", type=str, default="qwen3-30b-a3b-instruct-2507")
-parser.add_argument("--output_path", type=str, default="./{phase}/results/{prompt_type}_{model}.ttl")
+
+parser.add_argument("--input_type", type=str, default="titan")
+parser.add_argument("--prompt_type", type=str, default="final_prompt")
+
 parser.add_argument("--api_key_path", type=str, default="./archive/apikey.txt")
 
 args = parser.parse_args()
@@ -15,17 +16,17 @@ args = parser.parse_args()
 url = "https://chat-ai.academiccloud.de/v1/chat/completions"
 model = args.model
 
-input_path = Path(args.input_path.format(phase=args.phase))
-prompt_path = Path(args.prompt_path.format(phase=args.phase))
-out_path = Path(args.output_path.format(phase=args.phase, model=args.model))
+input_path = Path(f"./data/{args.phase}/{args.input_type}.txt")
+prompt_path = Path(f"./{args.phase}/prompt/{args.prompt_type}.txt")
+out_path = Path(f"./{args.phase}/results/{args.prompt_type}_{args.input_type}_{args.model}.ttl")
 
-with open(args.api_key_path, "r") as file:
+with open(args.api_key_path, "r", encoding="utf-8") as file:
     api_key = file.read().strip()
 
-with open(prompt_path, "r") as file:
+with open(prompt_path, "r", encoding="utf-8") as file:
     prompt = file.read()
 
-with open(input_path, "r") as file:
+with open(input_path, "r", encoding="utf-8") as file:
     input = file.read()
 
 headers = {

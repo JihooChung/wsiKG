@@ -5,7 +5,8 @@ wsi:Research_Paper_CLAM rdf:type wsi:Research_Paper ;
     wsi:hasStepApplication wsi:CLAM_Segmentation ;
     wsi:hasStepApplication wsi:CLAM_Patch_Extraction ;
     wsi:hasStepApplication wsi:CLAM_Feature_Extraction ;
-    wsi:hasStepApplication wsi:CLAM_Aggregation ;
+    wsi:hasStepApplication wsi:CLAM_Attention_Score_Calculation ;
+    wsi:hasStepApplication wsi:CLAM_Attention_based_Pooling .
 
 wsi:CLAM_Segmentation rdf:type wsi:Step_Application ;
     wsi:ofStep wsi:Segmentation ;
@@ -27,7 +28,7 @@ wsi:CLAM_Feature_Extraction rdf:type wsi:Step_Application ;
     wsi:hasInputData wsi:Patches ;
     wsi:hasOutputData wsi:1024_Feature_Embedding ;
     wsi:usesAlgorithm wsi:ResNet50_Feature_Extraction ;
-    wsi:nextStepApplication wsi:CLAM_Instance_Level_Clustering .
+    wsi:nextStepApplication wsi:CLAM_Attention_Score_Calculation .
 
 wsi:CLAM_Attention_Score_Calculation rdf:type wsi:Step_Application ;
     wsi:ofStep wsi:Attention_Score_Calculation ;
@@ -66,7 +67,7 @@ wsi:Segmentation_Algorithm rdf:type wsi:Algorithm ;
 
 wsi:Patch_Extraction_Algorithm rdf:type wsi:Algorithm ;
     wsi:hasParameter wsi:Patch_Size_256x256 ;
-    wsi:hasParameter wsi:Patch_Magnification_20x_to_40x ;
+    wsi:hasParameter wsi:Patch_Magnification_20x_to_40x .
 
 wsi:ResNet50_Feature_Extraction rdf:type wsi:Algorithm ;
     wsi:hasParameter wsi:Pretrained_ImageNet ;

@@ -1,0 +1,153 @@
+wsi:Research_Paper_PatchGCN rdf:type wsi:Research_Paper ;
+    wsi:hasPurpose "To develop Patch-GCN, a context-aware, spatially-resolved patch-based graph convolutional network that hierarchically aggregates instance-level histology features to model local- and global-level topological structures in the tumor microenvironment for improved cancer prognostication using whole slide images." ;
+    wsi:hasGithubRepo "https://github.com/mahmoodlab/Patch-GCN" ;
+    wsi:hasMethodology wsi:PatchGCN_StepApplication_1 ;
+    wsi:hasStepApplication wsi:PatchGCN_StepApplication_1 ;
+    wsi:hasStepApplication wsi:PatchGCN_StepApplication_2 ;
+    wsi:hasStepApplication wsi:PatchGCN_StepApplication_3 ;
+    wsi:hasStepApplication wsi:PatchGCN_StepApplication_4 ;
+    wsi:hasStepApplication wsi:PatchGCN_StepApplication_5 .
+
+wsi:PatchGCN_StepApplication_1 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Tissue_Masking ;
+    wsi:hasInputData wsi:Whole_Slide_Image ;
+    wsi:hasOutputData wsi:Tissue_Mask ;
+    wsi:usesAlgorithm wsi:OTSU_Thresholding ;
+    wsi:nextStepApplication wsi:PatchGCN_StepApplication_2 .
+
+wsi:PatchGCN_StepApplication_2 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Patch_Extraction ;
+    wsi:hasInputData wsi:Tissue_Mask ;
+    wsi:hasOutputData wsi:Tissue_Patches ;
+    wsi:usesAlgorithm wsi:NonOverlapping_Patching ;
+    wsi:hasParameter wsi:Patch_Size_256 ;
+    wsi:nextStepApplication wsi:PatchGCN_StepApplication_3 .
+
+wsi:PatchGCN_StepApplication_3 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Feature_Extraction ;
+    wsi:hasInputData wsi:Tissue_Patches ;
+    wsi:hasOutputData wsi:1024_Feature_Embedding ;
+    wsi:usesAlgorithm wsi:ResNet50 ;
+    wsi:hasParameter wsi:Pretrained_ImageNet ;
+    wsi:hasParameter wsi:Average_Pooling_3rd_Residual_Block ;
+    wsi:nextStepApplication wsi:PatchGCN_StepApplication_4 .
+
+wsi:PatchGCN_StepApplication_4 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:WSI_Graph_Construction ;
+    wsi:hasInputData wsi:1024_Feature_Embedding ;
+    wsi:hasOutputData wsi:WSI_Graph ;
+    wsi:usesAlgorithm wsi:Fast_Approximate_k_NN ;
+    wsi:hasParameter wsi:k_8 ;
+    wsi:hasParameter wsi:Euclidean_Space_Neighborhood ;
+    wsi:nextStepApplication wsi:PatchGCN_StepApplication_5 .
+
+wsi:PatchGCN_StepApplication_5 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Aggregation ;
+    wsi:hasInputData wsi:WSI_Graph ;
+    wsi:hasOutputData wsi:Slide_Level_Embedding ;
+    wsi:usesAlgorithm wsi:Attention_Pooling ;
+    wsi:hasParameter wsi:Softmax_Aggregation ;
+    wsi:hasParameter wsi:Attention_Weighting ;
+    wsi:hasParameter wsi:Residual_Connections ;
+    wsi:hasParameter wsi:4_Hop_Neighborhood ;
+    wsi:hasParameter wsi:Dense_Connections .
+
+wsi:Tissue_Masking rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Patching .
+
+wsi:Patch_Extraction rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Patching .
+
+wsi:Feature_Extraction rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Feature_Extraction .
+
+wsi:WSI_Graph_Construction rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Feature_Extraction .
+
+wsi:Aggregation rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Aggregation .
+
+wsi:OTSU_Thresholding rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Saturation_Channel_Binarization .
+
+wsi:NonOverlapping_Patching rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Patch_Size_256 .
+
+wsi:ResNet50 rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Pretrained_ImageNet ;
+    wsi:hasParameter wsi:Average_Pooling_3rd_Residual_Block .
+
+wsi:Fast_Approximate_k_NN rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:k_8 ;
+    wsi:hasParameter wsi:Euclidean_Space_Neighborhood .
+
+wsi:Attention_Pooling rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Softmax_Aggregation ;
+    wsi:hasParameter wsi:Attention_Weighting ;
+    wsi:hasParameter wsi:Residual_Connections ;
+    wsi:hasParameter wsi:4_Hop_Neighborhood ;
+    wsi:hasParameter wsi:Dense_Connections .
+
+wsi:Whole_Slide_Image rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:SVS .
+
+wsi:Tissue_Mask rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:PNG .
+
+wsi:Tissue_Patches rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:TIFF .
+
+wsi:1024_Feature_Embedding rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:WSI_Graph rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:Slide_Level_Embedding rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:SVS rdf:type wsi:Data_Format .
+
+wsi:PNG rdf:type wsi:Data_Format .
+
+wsi:TIFF rdf:type wsi:Data_Format .
+
+wsi:H5 rdf:type wsi:Data_Format .
+
+wsi:Patch_Size_256 rdf:type wsi:Parameter .
+
+wsi:Pretrained_ImageNet rdf:type wsi:Parameter .
+
+wsi:Average_Pooling_3rd_Residual_Block rdf:type wsi:Parameter .
+
+wsi:k_8 rdf:type wsi:Parameter .
+
+wsi:Euclidean_Space_Neighborhood rdf:type wsi:Parameter .
+
+wsi:Softmax_Aggregation rdf:type wsi:Parameter .
+
+wsi:Attention_Weighting rdf:type wsi:Parameter .
+
+wsi:Residual_Connections rdf:type wsi:Parameter .
+
+wsi:4_Hop_Neighborhood rdf:type wsi:Parameter .
+
+wsi:Dense_Connections rdf:type wsi:Parameter .
+
+wsi:Saturation_Channel_Binarization rdf:type wsi:Parameter .
+-----------------------------------------
+References:
+
+[RREF1] wsi_ontology3.ttl (0.462)
+### --------------------------------------------------
+### 3. Canonical Stage Individuals
+### --------------------------------------------------
+
+wsi:Stage_Patching rdf:type wsi:WSI_Stage ;
+    rdfs:label "Patching" .
+
+wsi:Stage_Feature_Extraction rdf:type wsi:WSI_Stage ;
+    rdfs:label "Feature Extraction" .
+
+wsi:Stage_Aggregation rdf:type wsi:WSI_Stage ;
+    rdfs:label "Aggregation" .

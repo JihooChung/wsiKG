@@ -1,0 +1,163 @@
+\begin{abstract}
+Representation learning of pathology whole-slide images (WSIs) has been has primarily relied on weak supervision with Multiple Instance Learning (MIL). However, the slide representations resulting from this approach are highly tailored to specific clinical tasks, which limits their expressivity and generalization, particularly in scenarios with limited data. Instead, we hypothesize that morphological redundancy in tissue can be leveraged to build a task-agnostic slide representation in an unsupervised fashion. To this end, we introduce $\ours$, a prototype-based approach rooted in the Gaussian mixture model that summarizes the set of WSI patches into a much smaller set of morphological prototypes. Specifically, each patch is assumed to have been generated from a mixture distribution, where each mixture component represents a morphological exemplar. Utilizing the estimated mixture parameters, we then construct a compact slide representation that can be readily used for a wide range of downstream tasks.
+By performing an extensive evaluation of $\ours$ on subtyping and survival tasks using 13 datasets, we show that 1) $\ours$ outperforms or is on par with supervised MIL baselines and 2) the analysis of morphological prototypes brings new qualitative and quantitative insights into model interpretability. The code is available at \url{https://github.com/mahmoodlab/Panther}.
+\end{abstract}
+
+\begin{figure*}[t]
+   \centering
+   \includegraphics[width=1\linewidth]{figures/Fig1_concise.jpg}
+   \caption{\textbf{Overview of $\ours$ workflow}. Whole-slide image (WSI) is segmented and patched into a set of WSI patches. A compressed feature for each patch is encoded through a feature extractor pretrained on a large histopathology dataset. $\ours$ uses the Gaussian mixture model for patch embedding distribution, with each mixture corresponding to a morphologically distinct prototype. The estimated model parameters are concatenated to form the slide representation, which can be used as input to a predictor module for clinical downstream tasks and visualized as a prototypical assignment map.
+   }
+   \label{fig:main}
+\end{figure*}
+
+\section{Methods}\label{sec:methods}
+We present $\ours$, an unsupervised slide representation learning framework based on a compact set of prototypes with GMM (\textbf{Fig.}~\ref{fig:main}). We first explain the GMM setup and its connection to a slide embedding (Section~\ref{sec:aggregation}). We then present how it is used for downstream tasks (Section~\ref{sec:downstream}) and prototype-based interpretation (Section~\ref{sec:interpretability}).
+
+\subsection{Prototype-based aggregation}\label{sec:aggregation}
+Given a WSI for subject $j$, we tessellate it into small non-overlapping patches $\mathbf{X}^j=\{\x_1^j,\cdots, \x^j_{N_j}\}$ with $\x_n^j\in\mathbb{R}^{W\times H \times 3}$. We then employ a feature extractor $f_{\text{enc}}(\cdot)$ pretrained on large archives of histopathology images~\cite{chen2024towards}, to extract a representative and compressed embedding from each patch.
+The set of extracted embeddings $\mathbf{Z}^j=\{\z_1^j, \cdots, \z_{N_j}^j \}$ with $\z_n^j = f_{\text{enc}}(\x_n^j) \in \mathbb{R}^d$ is then \textit{aggregated} to construct a slide embedding $\z_{\text{WSI}}^j$.
+
+We aim to represent the set $\mathbf{Z}^j$ with a small set of prototypes $\largeh=\{\mathbf{h}_1,\cdots,\mathbf{h}_C\}$ with $\h_c\in\mathbb{R}^d$, $C \ll N_j$, without compromising essential morphological information.
+Using the prototypes as \textit{references}, each patch is aggregated (or mapped) to the references and form $\slide\in\mathbb{R}^{C\cdot M}$~\cite{kim2022differentiable, mialon2021a}
+\begin{equation}
+    \slide=[\sum_{n=1}^{N_j}\phi^j(\z_n^j, \mathbf{h}_1),\cdots,\sum_{n=1}^{N_j}\phi^j(\z_n^j, \mathbf{h}_C)],
+\end{equation}
+where $\phi^j(\cdot, \cdot):\mathbb{R}^d\times\mathbb{R}^d\rightarrow\mathbb{R}^M$ is a function that maps a pair of patch embedding and reference, based on the similarity between the two, to a post-aggregation prototype embedding. In our work, the typical dimensions are $C=8\sim 32$ and $N_j=10,000\sim 20,000$. The $\slide$ dimension is fixed such that a variable-length set of $N_j$ features can always be represented in fixed-length. 
+ 
+To define and estimate the mapping function $\phi^j$, we introduce a probabilistic framework for patch embedding distribution and assume each $\z_n^j$ is generated from a GMM,
+\begin{equation}\label{eq:gmm}
+\begin{split}
+   p(\z_n^j ; \theta^j) &= \sum_{c=1}^C p(c_n^j=c; \theta^j)\cdot p(\z_n^j| c_n^j=c;\theta^j)\\
+   &= \sum_{c=1}^C\pi_c^j \cdot \mathcal{N}(\z_n^j; \boldsymbol{\mu}_c^j, \Sigma_c^j),\,\, s.t.\sum_{c=1}^C\pi_c^j=1,\\ 
+\end{split}
+\end{equation}
+where $\pi_c^j$ refers to the mixture probability of component $c$ in WSI set $j$ and $\theta^j$ refers to the set of parameters to be estimated, i.e., $\theta^j=\{\pi_c^j, \boldsymbol{\mu}_c^j, \Sigma_c^j \}_{c=1}^C$. For ease of computation, we use the diagonal covariance $\Sigma_c^j$. Intuitively, Eq.~\ref{eq:gmm} states that a morphological prototype and its variations correspond to a mixture component, with $\pi_c^j$ indicating the extent to which the pattern manifests in the $j^{\text{th}}$ WSI.
+
+We formulate the slide embedding construction as that of estimating $\widehat{\theta}^j$ from $\mathbf{Z}^j$. To this end, we maximize the log-likelihood (or log-posterior if prior is introduced for $\theta^j$)
+\begin{equation}
+    \max_{\theta^j} \log p(\mathbf{Z}^j;\theta^j)=\max_{\theta^j}\sum_{n=1}^{N_j}\log p(\mathbf{z}^j_n;\theta^j).
+\end{equation}
+
+We use the expectation-maximization (EM) algorithm to obtain the maximum likelihood estimate $\theta^j$~\cite{dempster1977maximum, kim2022differentiable}, with derivation provided in \supp. The algorithm produces a posterior distribution $q(c_n^j=c|\z_n^j)$, which represents the probability that $\z_n^j$ is associated with prototype $c$.
+At EM iteration $t+1$, it is given as
+\begin{equation}\label{eq:posterior}
+    q^{(t+1)}(c_n^j=c | \z_n^j) = \dfrac{\pi_c^{j, (t)}\mathcal{N}(\z_n^j; \boldsymbol{\mu}_c^{j,(t)}, \Sigma_c^{j,(t)})}{\sum_{c=1}^C\pi_c^{j,(t)}\mathcal{N}(\z_n^j; \boldsymbol{\mu}_c^{j,(t)}, \Sigma_c^{j,(t)})}.
+\end{equation}
+Eq.~(\ref{eq:posterior}) indicates that a patch is assigned to a certain prototype $c$ that is most similar, with the similarity measured in terms of weighted $\mathcal{L}_2$ distance. Moreover, the soft prototype assignment, i.e., $q^{(t+1)}(c_n^j=c | \z_n^j)>0,\,\forall c$, allows each patch to contribute towards all prototypes, in contrast to hard prototype assignment approaches~\cite{VU2023handcrafted, yu2023prototypical, quiros2023mapping, yao2020whole}. Using $q^{j,(t+1)}_{n,c}=q^{(t+1)}(c_n^j=c | \z_n^j)$ for notational simplicity, we can estimate $\theta^{j,(t+1)}$ as
+\begin{equation}\label{eq:em}
+\begin{split}
+    \pi_c^{j, (t+1)} &= \frac{\sum_{n=1}^{N_j} q^{j,(t+1)}_{n,c}}{N_j},\,\,\, \boldsymbol{\mu}_c^{j,(t+1)}=\frac{\sum_{n=1}^{N_j} q^{j,(t+1)}_{n,c}\cdot\z_n^j}{\sum_{n=1}^{N_j} q^{j,(t+1)}_{n,c}}\\
+    {\Sigma}_c^{j,(t+1)}&=\frac{\sum_{n=1}^{N_j} q^{j,(t+1)}_{n,c}\cdot (\z_n^j - \boldsymbol{\mu}_c^{j,(t+1)})^2}{\sum_{n=1}^{N_j} q^{j,(t+1)}_{n,c}}\\
+\end{split}
+\end{equation}
+We set $\pi_c^{j,(0)}=1/C$, $\boldsymbol{\mu}_c^{j,(0)}=\h_c$, and $\Sigma_c^{j,(0)}=\mathbf{I}$, which serves as a morphology-aware initialization. 
+Due to its iterative nature, EM can be placed as a neural network module. 
+The initialization for $\{\mathbf{h}_c\}_{c=1}^C$ is performed with K-means clustering on the entire patch training set, constructed by aggregating patch embeddings from all training slides in a cohort.
+
+Based on the final estimate $\widehat{\theta}^j$ after the EM convergence, the slide embedding $\z_{\text{WSI}}^j\in\mathbb{R}^{C\cdot M}$ with $M=1+2d$ can be represented as a concatenation of the elements in $\widehat{\theta}^j$, following set representation learning literature~\cite{mialon2021a, kim2022differentiable},  
+\begin{equation}\label{eq:slide_embed}
+    \begin{split}
+    \z_{\text{WSI}}^j&=[\z_{\text{WSI},1}^j,\cdots, \z_{\text{WSI},C}^j]\\
+    &=[\underbrace{\widehat{\pi}_1^{j}, \widehat{\boldsymbol{\mu}}_1^{j}, \widehat{\Sigma}_1^{j}}_{\sum_{n=1}^{N_j}\phi^j(\z_n^j, \mathbf{h}_1)}, \cdots, \underbrace{\widehat{\pi}_C^{j}, \widehat{\boldsymbol{\mu}}_C^{j}, \widehat{\Sigma}_C^{j}}_{\sum_{n=1}^{N_j}\phi^j(\z_n^j, \mathbf{h}_C)}].
+    \end{split}
+\end{equation}
+We emphasize that while the prototypes $\{\h_c \}_{c=1}^C$ are shared across different WSIs, the parameter estimation and the slide embedding construction are performed per WSI.
+Overall, the embedding $\slide$ satisfies two essential principles for a faithful WSI representation and good downstream performance. First, it accounts for the cardinality of each prototype explicitly through $\widehat{\pi}_c^{j}$ and implicitly through $\widehat{\boldsymbol{\mu}}_c^{j}$ and $\widehat{\Sigma}_c^{j}$. In addition, by concatenating the features (rather than averaging), feature vector for each morphological prototype is directly accessible for downstream tasks. 
+
+%% Haven't checked yet (3/12/24)
+\subsubsection{Connection to optimal transport}
+The aggregation in $\ours$ can be seen as matching the empirical distribution of patch embeddings and the prototypes, defined as $\hat{p}_j$ and $\hat{q}_j$ respectively. Specifically, we have $\hat{p}_j = \sum_{n=1}^{N_j}a_n^j\cdot\delta_{\z_n^j}\quad\text{and}\quad\hat{q}_j = \sum_{c=1}^{C}\pi_c^j \cdot \delta_{\mathbf{h}_c},$
+where $\sum_{n=1}^{N_j}a_n^j=\sum_{c=1}^C \pi_c^j=1$. OT aggregates $\{\z_n^j\}_{n=1}^{N_j}$ to $\{\mathbf{h}_c\}_{c=1}^C$ by minimizing the Wasserstein distance between $\hat{p}_j$ and $\hat{q}_j$, typically assuming uniform distribution for $\{a_n^j\}_{n=1}^{N_j}$ and $\{\pi_c^j\}_{c=1}^{C}$, i.e., $a_n^j=1/N_j$ and $\pi_c^j=1/C$~\cite{cuturi2013sinkhorn, mialon2021a}. While $\ours$ also assumes $a_n^j=1/N_j$, the mixture probability $\pi_c^j$ is estimated (Eq.~\ref{eq:em}). 
+Furthermore, the OT solution can be seen as a special case of GMM solution with uniform prototype distribution~\cite{kim2022differentiable}. 
+
+
+\subsection{Downstream evaluation}\label{sec:downstream}
+
+The embedding $\slide$ can be used as the input to a \textit{predictor} module $g(\cdot)$ for various downstream tasks. The predictor $g(\cdot)$ can be a linear layer (linear probing), or implemented as a multilayer perceptron (MLP). Instead of using the entire $\slide$ as an input to a MLP, we propose a structured MLP
+% we can inject nonlinearity by employing a series of mappings by leveraging the concatenated nature of $\z_{\text{WSI}}$,
+\begin{equation}\label{eq:MLP}
+    \begin{split}        
+        \z_{\text{WSI}}'&=[g^{\text{indiv.}}_1(\z_{\text{WSI},1}),\ldots, g^{\text{indiv.}}_C(\z_{\text{WSI},C})]\\
+        g(\z_{\text{WSI}})&=g^{\text{pred.}}(\z_{\text{WSI}}'),\\
+    \end{split}
+\end{equation}
+where $j$ is dropped for notational simplicity, and $g^{\text{pred.}}$ and $\{g^{\text{indiv.}}_c\}_{c=1}^C$ assume one of $\{\text{Identity}, \text{Linear}, \text{MLP}\}$. 
+Eq.~\ref{eq:MLP} leverages that $\slide$, which is a concatenation of mixture estimates, can be decomposed along each prototype and learns per-prototype nonlinear mapping $g^{\text{indiv.}}_c$. This is not possible with a typical MIL: First, the large and variable size of $N$ prohibits the learning of $\{g_n^{\text{indiv.}}\}_{n=1}^{N}$. Moreover, the permutation invariance makes finding an ``appropriate'' function $g_n^{\text{indiv.}}$ for a given patch embedding $\z_n$ non-trivial. 
+% end of review. 
+
+\subsection{Interpretability}\label{sec:interpretability}
+Based on the estimated prototype assignment probability $q$, we propose two approaches for interpretability. First, for each patch embedding $\z_n^j$, we assign the prototype with the highest posterior probability,
+\begin{equation}
+    c_n^j = \operatorname{argmax}_{c} q(c_n^j=c \mid \z_n^j),
+\end{equation}
+and overlay the prototype assignments onto WSI, visualizing how pathology visual concepts are distributed within each WSI (prototypical assignment map, \textbf{Fig.}~\ref{fig:heatmap}), with $\widehat{\pi}_c^j$ quantifying the extent of the distribution. For a specific prototype $c'$, we can also visualize how morphologically similar each patch embedding is to the prototype using $q(c_n^j=c' \mid \z_n^j)$ (\textbf{Fig.}~\ref{fig:top}). 
+
+\section{Experiments}\label{sec:experiments}
+\subsection{Datasets}
+\textbf{Subtyping} 
+We evaluate $\ours$ on four different subtyping tasks: EBRAINS fine subtyping (30 classes) and coarse subtyping (12 classes) for rare brain cancer types~\cite{gatta2017burden, roetzer2022digital}, Non-Small Cell Lung Carcinoma (NSCLC) subtyping on TCGA and CPTAC (2 classes), and ISUP grading based on Prostate cancer grade assessment (PANDA) challenge (6 classes)~\cite{bulten2020automated, bulten2022artificial}. We use balanced accuracy and weighted F1 metrics for evaluation on EBRAINS and NSCLC subtyping task and Cohen's $\kappa$ for the ISUP grading task. 
+
+\noindent\textbf{Survival} We evaluate $\ours$ on TCGA across several cancer types: Breast
+Invasive Carcinoma (BRCA), Colon and Rectum Adenocarcinoma (CRC), Bladder Urothelial Carcinoma (BLCA), Uterine corpus endometrial carcinoma (UCEC), Kidney renal clear cell carcinoma (KIRC), and Lung adenocarcinoma (LUAD). For TCGA, we use the 5-fold site-stratified cross-validation. For cancer types with external validation datasets (\textbf{KIRC}: CPTAC, \textbf{LUAD}: CPTAC, NLST), we use the models trained on TCGA and evaluate on the external dataset.
+We use the concordance index (c-index) for evaluation. To address the shortcomings of overall survival accounting for non-cancerous deaths~\cite{liu2018integrated, carmichael2022incorporating, jaume2023modeling}, we use disease-specific survival (DSS). Additional details can be found in $\supp$.
+
+\begin{table*}[!ht]
+\centering
+\small
+\caption{\textbf{Subtyping prediction} Results of $\ours$ and baselines for four different subtyping tasks. All methods use UNI features~\cite{chen2024towards}. Best performance in \textbf{bold}, second best \underline{underlined}. AttnMISL, ProtoCounts, H2T, OT, and $\ours$ use $C=16$ prototypes.}
+\begin{tabular}{ll|cc|cc|cc|cc}
+\toprule
+&\textbf{Train on} & \multicolumn{2}{c}{EBRAINS} & \multicolumn{2}{c}{EBRAINS} & \multicolumn{2}{c}{TCGA-NSCLC} & \multicolumn{2}{c}{PANDA} \\
+& & \multicolumn{2}{c}{(fine, 30 classes)} & \multicolumn{2}{c}{(coarse, 12 classes)} & \multicolumn{2}{c}{(2 classes)} & \multicolumn{2}{c}{(6 classes)} \\
+\cline{3-10}
+&\textbf{Test on} & \multicolumn{2}{c|}{EBRAINS} & \multicolumn{2}{c|}{EBRAINS} & TCGA & CPTAC & Karolinska & Radboud \\
+&& (Bal. acc.) & (F1) & (Bal. acc.) & (F1) & (Bal. acc.) & (Bal. acc.) & (Cohen's $\kappa$) & (Cohen's $\kappa$) \\
+\midrule
+\parbox[t]{0mm}{\multirow{5}{*}{\rotatebox[origin=c]{90}{{\textbf{Supervised.}}}}} 
+&ABMIL~\cite{ilse2018attention} & 0.674 & 0.744 & 0.834 & 0.906 & 0.949 & \underline{0.904} & \underline{0.935} & 0.918 \\
+% \hline
+&TransMIL~\cite{shao2021transmil} & \textbf{0.701} & \underline{0.758} & \underline{0.848} & \textbf{0.921} & 0.959 & 0.867 & \textbf{0.942} & \underline{0.922} \\
+% \hline 
+&DSMIL~\cite{li2021dual} & 0.648 & 0.698 & 0.824 & 0.882 & \textbf{0.980} & 0.791 & 0.909 & 0.911\\
+% \hline
+% IB-MIL~\cite{li2023task} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+% % \hline
+&AttnMISL~\cite{yao2020whole} & 0.534 & 0.636 & 0.647 & 0.823 & 0.888 & 0.823 & 0.882 & 0.894 \\
+% \hline
+&ILRA~\cite{xiang2023exploring} & 0.618 & 0.695 & 0.820 & 0.896 & 0.939 & 0.887 & 0.931 & 0.925 \\
+% \hline
+\midrule
+\parbox[t]{0mm}{\multirow{4}{*}{\rotatebox[origin=c]{90}{{\textbf{Unsup.}}}}} 
+&DeepSets~\cite{zaheer2017deep} & 0.033 & 0.073 & 0.082 & 0.2 & 0.571 & 0.707 & $<$ 0 & $<$ 0 \\
+% \hline
+&ProtoCounts~\cite{yu2023prototypical, quiros2023mapping} & 0.038 & 0.018 & 0.097 & 0.079 & 0.429 & 0.569 & $<$ 0 & 0.13 \\
+% \hline
+&H2T~\cite{VU2023handcrafted} & 0.117 & 0.223 & 0.181 & 0.421 & 0.929 & 0.821 & 0.457 & 0.755  \\
+&OT~\cite{mialon2021a} & \underline{0.700} & 0.756 & 0.837 & \underline{0.915} & 0.950 & 0.867 & 0.817 & 0.883  \\
+\midrule
+\parbox[t]{0mm}{\multirow{5}{*}{\rotatebox[origin=c]{90}{{\textbf{Ours}}}}} 
+&$\ours_{\text{Top}}$ + lin. & \multirow{1}{*}{0.471} & \multirow{1}{*}{0.571} & \multirow{1}{*}{0.554} & \multirow{1}{*}{0.758} & \multirow{1}{*}{0.857} & \multirow{1}{*}{0.833} & \multirow{1}{*}{0.631} & \multirow{1}{*}{0.689} \\
+&$\ours_{\text{Bot.}}$ + lin. & \multirow{1}{*}{0.038} & \multirow{1}{*}{0.080} & \multirow{1}{*}{0.138} & \multirow{1}{*}{0.329} & \multirow{1}{*}{0.602} & \multirow{1}{*}{0.705} & \multirow{1}{*}{0.071} & \multirow{1}{*}{0.000} \\
+&$\ours_{\text{WA}}$ + lin. & \multirow{1}{*}{0.497} & \multirow{1}{*}{0.598} & \multirow{1}{*}{0.569} & \multirow{1}{*}{0.784} & \multirow{1}{*}{0.888} & \multirow{1}{*}{0.860} & \multirow{1}{*}{0.663} & \multirow{1}{*}{0.787} \\
+&\textbf{$\ours_{\text{All}}$ + lin.} & \multirow{1}{*}{0.691} & \multirow{1}{*}{0.756} & \multirow{1}{*}{0.829} & \multirow{1}{*}{0.904} & \multirow{1}{*}{0.939} & \multirow{1}{*}{0.882} & \multirow{1}{*}{0.866} & \multirow{1}{*}{0.909} \\
+&\textbf{$\ours_{\text{All}}$ + MLP} & \multirow{1}{*}{0.693} & \multirow{1}{*}{\textbf{0.760}} & \multirow{1}{*}{\textbf{0.854}} & \multirow{1}{*}{0.908} & \multirow{1}{*}{\textbf{0.980}} & \multirow{1}{*}{\textbf{0.906}} & \multirow{1}{*}{0.923} & \multirow{1}{*}{\textbf{0.931}}  \\
+\bottomrule
+\end{tabular}
+\label{tab:clf_main}
+\end{table*}
+
+\subsection{Baselines}
+We employ 1) \textit{unsupervised} baselines, which use unsupervised slide representation followed by the task-specific linear network, and 2) \textit{supervised} baselines, which construct supervised slide representation for each task. For the \textit{unsupervised} baselines, we use the following: 1) \textbf{DeepSets}~\cite{zaheer2017deep} The slide embedding $\slide\in\mathbb{R}^d$ is formed by averaging all the features in the set. 2) \textbf{ProtoCounts}~\cite{quiros2023mapping, yu2023prototypical} K-means clustering is performed on the cohort-aggregated set of features. The slide embedding $\slide\in\mathbb{R}^C$ is a count vector of the number of patches assigned to each cluster. 3) \textbf{H2T}~\cite{VU2023handcrafted} The patch embeddings are clustered and averaged within each cluster. The averaged cluster centroids are concatenated, with $\slide\in\mathbb{R}^{C\cdot d}$. 4) \textbf{Optimal Transport (OT)}~\cite{mialon2021a} The patch features of a WSI is aggregated to a set of prototypes with OT~\cite{cuturi2013sinkhorn}, with $\slide\in\mathbb{R}^{C\cdot d}$. OT assumes uniform mixture probability, i.e., $\pi_c^j=1/C, \forall c$.
+
+We also implement the following supervised baselines: Attention-based MIL (ABMIL)~\cite{ilse2018attention}, Transformer-based MIL (TransMIL)~\cite{shao2021transmil}, Prototype-clustering based MIL (AttnMISL)~\cite{yao2020whole}, and low-rank MIL (ILRA)~\cite{xiang2023exploring}.
+
+For $\ours$, we experiment with variations of $\slide$ to better understand our model: 1) \textbf{All} (original): All mixture parameters are concatenated, $\slide\in\mathbb{R}^{C(1+2d)}$. 2) \textbf{Weighted avg.} (WA): $\boldsymbol{\mu}_c$ and $\Sigma_c$ weighted-averaged by $\pi_c$ and concatenated, $\slide\in\mathbb{R}^{2d}$. 3) \textbf{Top (Bottom)}: Parameters for mixture component with the largest (smallest) $\widehat{\pi}^j_c$ is selected, $\slide\in\mathbb{R}^{(1+2d)}$. We use either linear (+lin.) or nonlinear head (+MLP) on top of $\slide$.
+
+
+
+For the feature extractor $f_{\text{enc}}(\cdot)$, which is the same for all baselines used in this work, we used UNI~\cite{chen2024towards}, a ViT-L/16 DINOv2~\cite{dosovitskiy2021image,oquab2023dinov2} that was pre-trained on a large internal histology dataset of $1\times10^8$ patches from $1\times 10^6$ WSIs\footnote{Accessible at: https://github.com/mahmoodlab/UNI}. We also experiment with other feature encoders, CTransPath~\cite{wang2022transformer} and ResNet50~\cite{he2016deep}, the results of which can be found in $\supp$.
+
+
+\subsection{Implementation}
+WSIs at $20\times$ magnification ($0.5\, \mu m$/pixel) are patched with non-overlapping patches of $256\times 256$ pixels. For each WSI, we use all patches without sampling. We found that a single EM step is sufficient for convergence. The prototypes $\mathbf{H}$ are constructed from K-means clustering on the set of patches aggregated from the training cohort (all slides) for each task. The same $\mathbf{H}$ is used for AttnMISL, ProtoCounts, H2T, OT, and $\ours$. Additional details on training and loss functions can be found in $\supp$.

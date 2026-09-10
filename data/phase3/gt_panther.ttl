@@ -1,0 +1,73 @@
+wsi:Research_Paper_Panther rdf:type wsi:Research_Paper ;
+    wsi:hasPurpose "A prototype-based approach rooted in the Gaussian mixture model that summarizes the set of WSI patches into a much smaller
+set of morphological prototypes" ;
+    wsi:hasGithubRepo "https://github.com/mahmoodlab/Panther" ;
+    wsi:hasMethodology wsi:Panther_Patch_Extraction ;
+    wsi:hasStepApplication wsi:Panther_Patch_Extraction ;
+    wsi:hasStepApplication wsi:Panther_Feature_Extraction ;
+    wsi:hasStepApplication wsi:Panther_Prototype_Generation ;
+    wsi:hasStepApplication wsi:Panther_Prototype_based_Aggregation .
+
+wsi:Panther_Patch_Extraction rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Patch_Extraction ;
+    wsi:hasInputData wsi:Whole_Slide_Image ;
+    wsi:hasOutputData wsi:Patches ;
+    wsi:usesAlgorithm wsi:Patch_Extraction_Algorithm ;
+    wsi:nextStepApplication wsi:Panther_Feature_Extraction .
+
+wsi:Panther_Feature_Extraction rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Feature_Extraction ;
+    wsi:hasInputData wsi:Patches ;
+    wsi:hasOutputData wsi:Feature_Embeddings ;
+    wsi:usesAlgorithm wsi:UNI_Pretrained_Encoder ;
+    wsi:nextStepApplication wsi:Panther_Prototype_Generation .
+
+wsi:Panther_Prototype_Generation rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Prototype_based_Aggregation ;
+    wsi:hasInputData wsi:Feature_Embeddings ;
+    wsi:hasOutputData wsi:Initial_Prototypes ;
+    wsi:usesAlgorithm wsi:K-means ;
+    wsi:nextStepApplication wsi:Panther_Prototype_based_Aggregation .
+
+wsi:Panther_Prototype_based_Aggregation rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Prototype_based_Aggregation ;
+    wsi:hasInputData wsi:Feature_Embeddings ;
+    wsi:hasInputData wsi:Initial_Prototypes ;
+    wsi:hasOutputData wsi:Slide_Representation ;
+    wsi:usesAlgorithm wsi:Gaussian_Mixture_Model_EM .
+
+wsi:Patch_Extraction rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Patching .
+
+wsi:Feature_Extraction rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Feature_Extraction .
+
+wsi:Prototype_based_Aggregation rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Aggregation .
+
+wsi:Patch_Extraction_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Patch_Size_256x256 ;
+    wsi:hasParameter wsi:Patch_Magnification_20x .
+
+wsi:UNI_Pretrained_Encoder rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Pretrained_Internal_Histology_Dataset . 
+
+wsi:K-means rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Number_Of_Prototypes_16 . 
+
+wsi:Gaussian_Mixture_Model_EM rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Diagonal_Covariance .
+    wsi:hasParameter wsi:EM_Iteration .  
+
+wsi:Whole_Slide_Image rdf:type wsi:Data_Content .
+wsi:Patches rdf:type wsi:Data_Content .
+wsi:Feature_Embeddings rdf:type wsi:Data_Content .
+wsi:Initial_Prototypes rdf:type wsi:Data_Content .
+wsi:Slide_Representation rdf:type wsi:Data_Content .
+
+wsi:Patch_Size_256x256 rdf:type wsi:Parameter .
+wsi:Patch_Magnification_20x rdf:type wsi:Parameter .
+wsi:Pretrained_Internal_Histology_Dataset rdf:type wsi:Parameter .
+wsi:Number_Of_Prototypes_16 rdf:type wsi:Parameter .
+wsi:Diagonal_Covariance rdf:type wsi:Parameter .
+wsi:EM_Iteration rdf:type wsi:Parameter .

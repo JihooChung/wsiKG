@@ -35,7 +35,7 @@ wsi:SVS rdf:type wsi:Data_Format .
 wsi:H5 rdf:type wsi:Data_Format .
 wsi:Segmentation_Mask rdf:type wsi:Data_Format  .
 wsi:Human_Readable_Text_File rdf:type wsi:Data_Format  .
-wsi:1024_Feature_Embedding rdf:type wsi:Data_Format ;
+wsi:1024_Feature_Embedding rdf:type wsi:Data_Format .
 
 wsi:WSI_Downsampled_32x  rdf:type wsi:Parameter .
 wsi:WSI_Converted_HSV rdf:type wsi:Parameter .
