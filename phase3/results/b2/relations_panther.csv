@@ -1,0 +1,14 @@
+relation
+wsi:belongsToStage
+wsi:hasGithubRepo
+wsi:hasInputData
+wsi:hasMethodology
+wsi:hasOutputData
+wsi:hasParameter
+wsi:hasPurpose
+wsi:hasStepApplication
+wsi:hasValue
+wsi:nextStepApplication
+wsi:ofStep
+wsi:storedInFormat
+wsi:usesAlgorithm

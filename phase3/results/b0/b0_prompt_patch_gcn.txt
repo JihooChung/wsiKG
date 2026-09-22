@@ -1,0 +1,328 @@
+Based on the provided **Abstract**, **Method**, and **Experimental Setup** sections of the paper, here is a **structured RDF (Resource Description Framework)** representation of the **Patch-GCN workflow** in computational pathology, using **OWL (Web Ontology Language)**-style semantics and **RDF triples** to capture key components, relationships, and processes.
+
+This RDF model captures:
+- The **data pipeline** (WSI → patches → features → graph → prediction)
+- **Key components** (WSI-Graph, Patch-GCN, GCN layers, attention pooling)
+- **Functional modules** (tissue segmentation, feature extraction, graph construction, message passing)
+- **Evaluation metrics** and **datasets**
+- **Interpretability** via attention heatmaps
+
+---
+
+### 📦 **RDF Triples (Turtle Format)**
+
+```turtle
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix bio: <http://purl.org/bio/ontology/> .
+@prefix cpath: <http://purl.org/cpath#> .
+@prefix patchgcn: <http://purl.org/patchgcn#> .
+@prefix schema: <http://schema.org/> .
+
+# --- Ontology Declaration ---
+patchgcn:PatchGCN a owl:Class ;
+    rdfs:label "Patch-GCN" ;
+    rdfs:comment "A context-aware, spatially-resolved patch-based graph convolutional network for survival prediction in whole slide images." .
+
+patchgcn:WSI a owl:Class ;
+    rdfs:label "Whole Slide Image" ;
+    rdfs:comment "High-resolution digital histology image of a tissue section." .
+
+patchgcn:Patch a owl:Class ;
+    rdfs:label "Image Patch" ;
+    rdfs:comment "A 256x256 pixel region extracted from a WSI at 20x magnification." .
+
+patchgcn:Graph a owl:Class ;
+    rdfs:label "Graph" ;
+    rdfs:comment "A graph structure representing spatial relationships between image patches." .
+
+patchgcn:WSIGraph a owl:Class ;
+    rdfs:label "WSI-Graph" ;
+    rdfs:subClassOf patchgcn:Graph ;
+    rdfs:comment "A graph constructed from patches of a WSI, with nodes as patches and edges as spatial proximity." .
+
+patchgcn:GCNLayer a owl:Class ;
+    rdfs:label "Graph Convolutional Network Layer" ;
+    rdfs:comment "A layer performing message passing over graph nodes to aggregate local context." .
+
+patchgcn:AttentionPooling a owl:Class ;
+    rdfs:label "Attention-Based Pooling" ;
+    rdfs:comment "A global pooling mechanism that computes weighted sum of node features using attention." .
+
+# --- Data Sources & Datasets ---
+dcterms:hasPart patchgcn:TCGA patchgcn:BLCA, patchgcn:BRCA, patchgcn:GBMLGG, patchgcn:LUAD, patchgcn:UCEC .
+
+patchgcn:TCGA a dcterms:Dataset ;
+    rdfs:label "The Cancer Genome Atlas (TCGA)" ;
+    dcterms:description "A public database of genomic, epigenomic, and clinical data from cancer patients." ;
+    dcterms:identifier "https://www.cancer.gov/tcga" ;
+    dcterms:license <https://www.cancer.gov/tcga/terms-of-use> .
+
+patchgcn:BLCA a dcterms:Dataset ;
+    rdfs:label "Bladder Urothelial Carcinoma" ;
+    dcterms:identifier "TCGA-BLCA" ;
+    dcterms:hasPart patchgcn:WSI ;
+    dcterms:spatial <https://www.cancer.gov/tcga> ;
+    dcterms:temporal <2000-2015> ;
+    dcterms:subject "Cancer" ;
+    dcterms:coverage "437 WSIs" .
+
+patchgcn:BRCA a dcterms:Dataset ;
+    rdfs:label "Breast Invasive Carcinoma" ;
+    dcterms:identifier "TCGA-BRCA" ;
+    dcterms:coverage "1022 WSIs" .
+
+patchgcn:GBMLGG a dcterms:Dataset ;
+    rdfs:label "Glioblastoma & Lower Grade Glioma" ;
+    dcterms:identifier "TCGA-GBMLGG" ;
+    dcterms:coverage "1011 WSIs" .
+
+patchgcn:LUAD a dcterms:Dataset ;
+    rdfs:label "Lung Adenocarcinoma" ;
+    dcterms:identifier "TCGA-LUAD" ;
+    dcterms:coverage "515 WSIs" .
+
+patchgcn:UCEC a dcterms:Dataset ;
+    rdfs:label "Uterine Corpus Endometrial Carcinoma" ;
+    dcterms:identifier "TCGA-UCEC" ;
+    dcterms:coverage "538 WSIs" .
+
+# --- Workflow Steps (Provenance) ---
+patchgcn:PreprocessWSI a prov:Activity ;
+    rdfs:label "Preprocess Whole Slide Image" ;
+    prov:wasAssociatedWith patchgcn:PatchGCN ;
+    prov:used patchgcn:WSI ;
+    prov:generated patchgcn:Patch, patchgcn:WSIGraph .
+
+patchgcn:SegmentTissue a prov:Activity ;
+    rdfs:label "Tissue Segmentation" ;
+    prov:used patchgcn:WSI ;
+    prov:generated patchgcn:Mask ;
+    prov:wasAssociatedWith patchgcn:PatchGCN ;
+    prov:used patchgcn:HSVColorSpace, patchgcn:OtsuBinarization .
+
+patchgcn:ExtractFeatures a prov:Activity ;
+    rdfs:label "Extract Patch Features" ;
+    prov:used patchgcn:Patch, patchgcn:ResNet50 ;
+    prov:generated patchgcn:FeatureVector ;
+    prov:wasAssociatedWith patchgcn:PatchGCN .
+
+patchgcn:ConstructGraph a prov:Activity ;
+    rdfs:label "Construct WSI-Graph" ;
+    prov:used patchgcn:FeatureVector, patchgcn:Patch ;
+    prov:generated patchgcn:WSIGraph ;
+    prov:wasAssociatedWith patchgcn:PatchGCN ;
+    prov:used patchgcn:KNN, patchgcn:EuclideanSpace .
+
+patchgcn:MessagePassing a prov:Activity ;
+    rdfs:label "Graph Convolution via Message Passing" ;
+    prov:used patchgcn:WSIGraph, patchgcn:GCNLayer ;
+    prov:generated patchgcn:HierarchicalFeatures ;
+    prov:wasAssociatedWith patchgcn:PatchGCN .
+
+patchgcn:GlobalPooling a prov:Activity ;
+    rdfs:label "Global Attention Pooling" ;
+    prov:used patchgcn:HierarchicalFeatures ;
+    prov:generated patchgcn:WSIEmbedding ;
+    prov:wasAssociatedWith patchgcn:PatchGCN ;
+    prov:used patchgcn:AttentionPooling .
+
+patchgcn:PredictSurvival a prov:Activity ;
+    rdfs:label "Survival Prediction" ;
+    prov:used patchgcn:WSIEmbedding ;
+    prov:generated patchgcn:SurvivalRiskScore ;
+    prov:wasAssociatedWith patchgcn:PatchGCN ;
+    prov:used patchgcn:CoxLoss .
+
+# --- Components & Parameters ---
+patchgcn:ResNet50 a schema:NeuralNetwork ;
+    rdfs:label "ResNet-50" ;
+    schema:preTrainedModel "ImageNet" ;
+    schema:inputSize "256x256" ;
+    schema:outputDimension "1024" .
+
+patchgcn:KNN a patchgcn:NeighborhoodMethod ;
+    rdfs:label "k-Nearest Neighbors (k=8)" ;
+    rdfs:comment "Approximate k-NN in Euclidean space to model 3x3 receptive field" ;
+    patchgcn:kValue 8 .
+
+patchgcn:EuclideanSpace a patchgcn:Space ;
+    rdfs:label "Euclidean Space" ;
+    rdfs:comment "Graph edges are based on spatial proximity in 2D image coordinates" .
+
+patchgcn:SoftmaxAggregation a patchgcn:AggregationFunction ;
+    rdfs:label "Softmax Aggregation" ;
+    rdfs:comment "Attention-based aggregation of messages from neighbors" ;
+    patchgcn:temperature 1.0 .
+
+patchgcn:ResidualConnection a patchgcn:ConnectionType ;
+    rdfs:label "Residual Connection" ;
+    rdfs:comment "Add input to output of GCN layer for hierarchical feature learning" .
+
+patchgcn:DeepGCN a patchgcn:GCNImplementation ;
+    rdfs:label "DeepGCN" ;
+    dcterms:source "Li et al., 2019" ;
+    rdfs:comment "Implementation of message passing functions from DeepGCN" .
+
+# --- Model Architecture ---
+patchgcn:PatchGCN a patchgcn:PatchGCN ;
+    rdfs:label "Patch-GCN" ;
+    rdfs:comment "Hierarchical graph convolutional network for context-aware survival prediction" ;
+    patchgcn:hasComponent patchgcn:WSIGraph, patchgcn:GCNLayer, patchgcn:AttentionPooling ;
+    patchgcn:hasLayerCount 4 ;
+    patchgcn:hasResidualConnections true ;
+    patchgcn:hasDenseConnections true ;
+    patchgcn:hasMessagePassing true ;
+    patchgcn:hasAttentionPooling true ;
+    patchgcn:hasGlobalAggregation true ;
+    patchgcn:hasSupervision patchgcn:CoxLoss .
+
+patchgcn:GCNLayer a patchgcn:GCNLayer ;
+    rdfs:label "Graph Convolutional Layer" ;
+    patchgcn:hasMessageFunction patchgcn:MessageFunction ;
+    patchgcn:hasAggregationFunction patchgcn:SoftmaxAggregation ;
+    patchgcn:hasUpdateFunction patchgcn:MLPUpdate ;
+    patchgcn:hasResidualConnection patchgcn:ResidualConnection .
+
+patchgcn:MessageFunction a patchgcn:MessageFunction ;
+    rdfs:label "Message Construction" ;
+    rdfs:comment "Add node and edge features, apply ReLU" ;
+    patchgcn:formula "ReLU(h_u + 1(h_e) * h_e) + ε" ;
+    patchgcn:epsilon 1e-7 .
+
+patchgcn:MLPUpdate a patchgcn:UpdateFunction ;
+    rdfs:label "MLP Update" ;
+    rdfs:comment "Add current node + aggregated message, apply MLP" ;
+    patchgcn:hasLayers 2 ;
+    patchgcn:activation "ReLU" .
+
+# --- Training & Evaluation ---
+patchgcn:TrainModel a prov:Activity ;
+    rdfs:label "Train Patch-GCN Model" ;
+    prov:used patchgcn:PatchGCN, patchgcn:TCGA ;
+    prov:generated patchgcn:TrainedModel ;
+    prov:used patchgcn:AdamOptimizer, patchgcn:CoxLoss ;
+    patchgcn:learningRate 2e-4 ;
+    patchgcn:weightDecay 1e-5 ;
+    patchgcn:epochs 20 ;
+    patchgcn:batchSize 1 ;
+    patchgcn:gradientAccumulationSteps 32 ;
+    patchgcn:gpuCount 4 ;
+    patchgcn:gpuModel "NVIDIA 2080 Ti" .
+
+patchgcn:EvaluateModel a prov:Activity ;
+    rdfs:label "Evaluate Model Performance" ;
+    prov:used patchgcn:TrainedModel, patchgcn:TCGA ;
+    prov:generated patchgcn:PerformanceMetrics ;
+    prov:used patchgcn:5FoldCrossValidation, patchgcn:ConcordanceIndex .
+
+patchgcn:5FoldCrossValidation a patchgcn:ValidationMethod ;
+    rdfs:label "5-Fold Cross-Validation" ;
+    rdfs:comment "Each dataset split into 5 folds: 80% train, 20% validation" .
+
+patchgcn:ConcordanceIndex a patchgcn:PerformanceMetric ;
+    rdfs:label "Concordance Index (c-Index)" ;
+    rdfs:comment "Measures ranking accuracy of predicted survival times" ;
+    patchgcn:range "0.0 to 1.0" ;
+    patchgcn:higherIsBetter true .
+
+patchgcn:KaplanMeierCurve a patchgcn:Visualization ;
+    rdfs:label "Kaplan-Meier Survival Curve" ;
+    rdfs:comment "Visualizes stratification of low-risk vs high-risk patients" ;
+    patchgcn:usedFor "Qualitative assessment of model interpretability" .
+
+patchgcn:AttentionHeatmap a patchgcn:Visualization ;
+    rdfs:label "Attention-Based Heatmap" ;
+    rdfs:comment "Highlights regions of high attention in WSI (e.g., lymphocytes, stroma)" ;
+    patchgcn:usedFor "Interpretability" ;
+    patchgcn:exampleImage <Fig2_Heatmap.png> .
+
+# --- Results ---
+patchgcn:Outperforms a patchgcn:Comparison ;
+    rdfs:label "Outperforms Prior Methods" ;
+    rdfs:comment "Patch-GCN outperforms all prior weakly-supervised approaches by 3.58–9.46% in c-Index" ;
+    patchgcn:improvement "3.58-9.46%" ;
+    patchgcn:baselineMethods "MIL, Attention-MIL, DeepMIL, etc." .
+
+# --- Public Availability ---
+patchgcn:CodeRepository a dcterms:Software ;
+    rdfs:label "Patch-GCN GitHub Repository" ;
+    dcterms:identifier "https://github.com/mahmoodlab/Patch-GCN" ;
+    dcterms:license <https://github.com/mahmoodlab/Patch-GCN/blob/main/LICENSE> ;
+    dcterms:contributor "Mahmood Lab" ;
+    dcterms:version "1.0" ;
+    dcterms:hasVersion patchgcn:TrainedModel .
+
+# --- Keywords (SKOS) ---
+skos:broader patchgcn:ComputationalPathology ;
+skos:broader patchgcn:WeaklySupervisedLearning ;
+skos:broader patchgcn:GraphConvolutionalNetworks ;
+skos:broader patchgcn:Interpretability ;
+skos:broader patchgcn:ComputerVision .
+
+# --- Ontology Mapping ---
+cpath:ComputationalPathology a owl:Class ;
+    rdfs:subClassOf skos:Concept .
+
+cpath:WeaklySupervisedLearning a owl:Class ;
+    rdfs:subClassOf skos:Concept .
+
+cpath:GraphConvolutionalNetwork a owl:Class ;
+    rdfs:subClassOf skos:Concept .
+
+cpath:Interpretability a owl:Class ;
+    rdfs:subClassOf skos:Concept .
+
+cpath:ComputerVision a owl:Class ;
+    rdfs:subClassOf skos:Concept .
+```
+
+---
+
+### ✅ **Key Features of This RDF Model**
+
+| Feature | Description |
+|-------|-------------|
+| **Modular & Reusable** | Components like `GCNLayer`, `AttentionPooling`, `WSIGraph` can be reused in other models. |
+| **Provenance-Driven** | Uses `prov:` to track workflow steps (e.g., `PreprocessWSI`, `TrainModel`). |
+| **Interpretability Support** | Captures attention heatmaps and Kaplan-Meier curves as visualizations. |
+| **Evaluation Rigor** | Includes `5-Fold Cross-Validation`, `c-Index`, and `Kaplan-Meier` as metrics. |
+| **Reproducibility** | Specifies hyperparameters, hardware, and code availability. |
+| **Semantic Interoperability** | Uses standard vocabularies (OWL, RDF, SKOS, PROV, schema.org). |
+
+---
+
+### 📌 Use Cases
+
+This RDF model can be used for:
+- **Knowledge Graphs** in digital pathology
+- **Model sharing & reproducibility** in AI for medicine
+- **Automated benchmarking** across cancer types
+- **Interpretability analysis** via attention maps
+- **Integration with FAIR data principles**
+
+---
+
+### 📎 Next Steps (Optional Extensions)
+
+- Add **patient-level metadata** (age, stage, survival time, censoring).
+- Link to **SNOMED CT** or **UMLS** for disease terms.
+- Integrate with **BioPortal** or **NCBO** for ontology alignment.
+- Use **SPARQL queries** to extract:  
+  - "Which cancer types have >1000 WSIs?"  
+  - "What is the c-Index improvement of Patch-GCN over MIL?"  
+  - "Which patches have highest attention in BRCA?"
+
+---
+
+Let me know if you'd like:
+- A **SPARQL query** to extract performance metrics
+- A **JSON-LD** version
+- A **graph visualization** (e.g., in Neo4j or Graphviz)
+- A **knowledge graph export** (e.g., for BioPortal or OpenKG)
+
+This RDF model is ready for integration into **AI-driven pathology platforms** and **FAIR data ecosystems**.

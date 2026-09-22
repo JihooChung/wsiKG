@@ -1,0 +1,252 @@
+wsi:Research_Paper_ours rdf:type wsi:Research_Paper ;
+    wsi:has_start_of_methodology wsi:Application_of_Step_Pretraining_Stage1 ;
+    wsi:has_application wsi:Application_of_Step_Pretraining_Stage1 ;
+    wsi:has_application wsi:Application_of_Step_VisionLanguage_Continual_Pretraining_Stage2 ;
+    wsi:has_application wsi:Application_of_Step_VisionLanguage_Continual_Pretraining_Stage3 .
+
+wsi:Application_of_Step_Pretraining_Stage1 rdf:type wsi:Application_of_Step ;
+    wsi:applies_step wsi:WSI_Processing_Step_Pretraining ;
+    wsi:applies_algorithm wsi:Algorithm_iBOT ;
+    wsi:applies_parameter wsi:Parameter_Local_Batch_Size_256 ;
+    wsi:applies_parameter wsi:Parameter_Num_Epochs_270 ;
+    wsi:applies_parameter wsi:Parameter_Num_GPUs_4 ;
+    wsi:applies_parameter wsi:Parameter_GPU_Type_A100_80GB ;
+    wsi:applies_parameter wsi:Parameter_View_Generation_Random_Sampling ;
+    wsi:applies_parameter wsi:Parameter_Positional_Encoding_2D_ALiBi ;
+    wsi:applies_parameter wsi:Parameter_Network_Architecture_ViT_6_Layers_12_Heads_768_Dim ;
+    wsi:applies_parameter wsi:Parameter_Patch_Size_512x512 ;
+    wsi:applies_parameter wsi:Parameter_Field_Of_View_8192x8192_at_20x ;
+    wsi:applies_parameter wsi:Parameter_Tissue_Grouping_By_Spatial_Proximity ;
+    wsi:applies_parameter wsi:Parameter_Tissue_Group_Min_Patches_16 .
+
+wsi:Application_of_Step_VisionLanguage_Continual_Pretraining_Stage2 rdf:type wsi:Application_of_Step ;
+    wsi:applies_step wsi:WSI_Processing_Step_VisionLanguage_Alignment ;
+    wsi:applies_algorithm wsi:Algorithm_CoCa ;
+    wsi:applies_parameter wsi:Parameter_Local_Batch_Size_196 ;
+    wsi:applies_parameter wsi:Parameter_Effective_Batch_Size_3136 ;
+    wsi:applies_parameter wsi:Parameter_Num_GPUs_8 ;
+    wsi:applies_parameter wsi:Parameter_GPU_Type_A100_80GB ;
+    wsi:applies_parameter wsi:Parameter_Synthetic_Caption_Generation_PathChat ;
+    wsi:applies_parameter wsi:Parameter_Caption_Diversification_Qwen2_7B_Instruct ;
+    wsi:applies_parameter wsi:Parameter_Caption_Sampling_423122_ROIs ;
+    wsi:applies_parameter wsi:Parameter_ROI_Size_8192x8192 ;
+    wsi:applies_parameter wsi:Parameter_Patch_Size_1024x1024 ;
+    wsi:applies_parameter wsi:Parameter_Patch_Clustering_KMeans_K16 ;
+    wsi:applies_parameter wsi:Parameter_Attentional_Pooler_1_Query_Contrastive ;
+    wsi:applies_parameter wsi:Parameter_Attentional_Pooler_128_Queries_Reconstruction ;
+    wsi:applies_parameter wsi:Parameter_Text_Encoder_CONCHv1_5 ;
+    wsi:applies_parameter wsi:Parameter_Multimodal_Decoder_CONCHv1_5 .
+
+wsi:Application_of_Step_VisionLanguage_Continual_Pretraining_Stage3 rdf:type wsi:Application_of_Step ;
+    wsi:applies_step wsi:WSI_Processing_Step_VisionLanguage_Alignment ;
+    wsi:applies_algorithm wsi:Algorithm_CoCa ;
+    wsi:applies_parameter wsi:Parameter_Local_Batch_Size_16 ;
+    wsi:applies_parameter wsi:Parameter_Effective_Batch_Size_256 ;
+    wsi:applies_parameter wsi:Parameter_Num_GPUs_8 ;
+    wsi:applies_parameter wsi:Parameter_GPU_Type_A100_80GB ;
+    wsi:applies_parameter wsi:Parameter_Real_Slide_Report_Curation ;
+    wsi:applies_parameter wsi:Parameter_Report_Cleaning_Qwen2_7B_Instruct ;
+    wsi:applies_parameter wsi:Parameter_Report_Rewriting_Qwen2_7B_Instruct ;
+    wsi:applies_parameter wsi:Parameter_Report_Sampling_182862_Pairs ;
+    wsi:applies_parameter wsi:Parameter_Slide_Crop_Size_64x64_Feature_Grids ;
+    wsi:applies_parameter wsi:Parameter_Field_Of_View_32768x32768_at_20x ;
+    wsi:applies_parameter wsi:Parameter_Attentional_Pooler_1_Query_Contrastive ;
+    wsi:applies_parameter wsi:Parameter_Attentional_Pooler_128_Queries_Reconstruction ;
+    wsi:applies_parameter wsi:Parameter_Text_Encoder_CONCHv1_5 ;
+    wsi:applies_parameter wsi:Parameter_Multimodal_Decoder_CONCHv1_5 ;
+    wsi:applies_parameter wsi:Parameter_Vision_Backbone_oursv ;
+    wsi:applies_parameter wsi:Parameter_Slow_Warmup_Vision_Backbone ;
+    wsi:applies_parameter wsi:Parameter_Small_Learning_Rate_Vision_Backbone ;
+    wsi:applies_parameter wsi:Parameter_Small_Weight_Decay_Vision_Backbone .
+
+wsi:WSI_Processing_Step_Pretraining rdf:type wsi:WSI_Processing_Step ;
+    wsi:belongs_to_stage wsi:WSI_Processing_Stage_Unimodal_Visual_Pretraining .
+
+wsi:WSI_Processing_Step_VisionLanguage_Alignment rdf:type wsi:WSI_Processing_Step ;
+    wsi:belongs_to_stage wsi:WSI_Processing_Stage_VisionLanguage_Continual_Pretraining .
+
+wsi:WSI_Processing_Stage_Unimodal_Visual_Pretraining rdf:type wsi:WSI_Processing_Stage ;
+    wsi:has_step wsi:WSI_Processing_Step_Pretraining .
+
+wsi:WSI_Processing_Stage_VisionLanguage_Continual_Pretraining rdf:type wsi:WSI_Processing_Stage ;
+    wsi:has_step wsi:WSI_Processing_Step_VisionLanguage_Alignment .
+
+wsi:Algorithm_iBOT rdf:type wsi:Algorithm ;
+    wsi:has_parameter wsi:Parameter_View_Generation_Random_Sampling ;
+    wsi:has_parameter wsi:Parameter_Positional_Encoding_2D_ALiBi ;
+    wsi:has_parameter wsi:Parameter_Network_Architecture_ViT_6_Layers_12_Heads_768_Dim ;
+    wsi:has_parameter wsi:Parameter_Patch_Size_512x512 ;
+    wsi:has_parameter wsi:Parameter_Field_Of_View_8192x8192_at_20x ;
+    wsi:has_parameter wsi:Parameter_Tissue_Grouping_By_Spatial_Proximity ;
+    wsi:has_parameter wsi:Parameter_Tissue_Group_Min_Patches_16 .
+
+wsi:Algorithm_CoCa rdf:type wsi:Algorithm ;
+    wsi:has_parameter wsi:Parameter_Local_Batch_Size_196 ;
+    wsi:has_parameter wsi:Parameter_Effective_Batch_Size_3136 ;
+    wsi:has_parameter wsi:Parameter_Num_GPUs_8 ;
+    wsi:has_parameter wsi:Parameter_GPU_Type_A100_80GB ;
+    wsi:has_parameter wsi:Parameter_Synthetic_Caption_Generation_PathChat ;
+    wsi:has_parameter wsi:Parameter_Caption_Diversification_Qwen2_7B_Instruct ;
+    wsi:has_parameter wsi:Parameter_Caption_Sampling_423122_ROIs ;
+    wsi:has_parameter wsi:Parameter_ROI_Size_8192x8192 ;
+    wsi:has_parameter wsi:Parameter_Patch_Size_1024x1024 ;
+    wsi:has_parameter wsi:Parameter_Patch_Clustering_KMeans_K16 ;
+    wsi:has_parameter wsi:Parameter_Attentional_Pooler_1_Query_Contrastive ;
+    wsi:has_parameter wsi:Parameter_Attentional_Pooler_128_Queries_Reconstruction ;
+    wsi:has_parameter wsi:Parameter_Text_Encoder_CONCHv1_5 ;
+    wsi:has_parameter wsi:Parameter_Multimodal_Decoder_CONCHv1_5 ;
+    wsi:has_parameter wsi:Parameter_Local_Batch_Size_16 ;
+    wsi:has_parameter wsi:Parameter_Effective_Batch_Size_256 ;
+    wsi:has_parameter wsi:Parameter_Report_Cleaning_Qwen2_7B_Instruct ;
+    wsi:has_parameter wsi:Parameter_Report_Rewriting_Qwen2_7B_Instruct ;
+    wsi:has_parameter wsi:Parameter_Report_Sampling_182862_Pairs ;
+    wsi:has_parameter wsi:Parameter_Slide_Crop_Size_64x64_Feature_Grids ;
+    wsi:has_parameter wsi:Parameter_Field_Of_View_32768x32768_at_20x ;
+    wsi:has_parameter wsi:Parameter_Vision_Backbone_oursv ;
+    wsi:has_parameter wsi:Parameter_Slow_Warmup_Vision_Backbone ;
+    wsi:has_parameter wsi:Parameter_Small_Learning_Rate_Vision_Backbone ;
+    wsi:has_parameter wsi:Parameter_Small_Weight_Decay_Vision_Backbone .
+
+wsi:Parameter_Local_Batch_Size_256 rdf:type wsi:Parameter ;
+    wsi:has_value "256" ;
+    wsi:applies_to wsi:Algorithm_iBOT .
+
+wsi:Parameter_Num_Epochs_270 rdf:type wsi:Parameter ;
+    wsi:has_value "270" ;
+    wsi:applies_to wsi:Algorithm_iBOT .
+
+wsi:Parameter_Num_GPUs_4 rdf:type wsi:Parameter ;
+    wsi:has_value "4" ;
+    wsi:applies_to wsi:Algorithm_iBOT .
+
+wsi:Parameter_GPU_Type_A100_80GB rdf:type wsi:Parameter ;
+    wsi:has_value "NVIDIA A100 80GB" ;
+    wsi:applies_to wsi:Algorithm_iBOT .
+
+wsi:Parameter_View_Generation_Random_Sampling rdf:type wsi:Parameter ;
+    wsi:has_value "random sampling from tissue groups" ;
+    wsi:applies_to wsi:Algorithm_iBOT .
+
+wsi:Parameter_Positional_Encoding_2D_ALiBi rdf:type wsi:Parameter ;
+    wsi:has_value "2D ALiBi with Euclidean distance bias" ;
+    wsi:applies_to wsi:Algorithm_iBOT .
+
+wsi:Parameter_Network_Architecture_ViT_6_Layers_12_Heads_768_Dim rdf:type wsi:Parameter ;
+    wsi:has_value "ViT with 6 layers, 12 heads, 768 dim" ;
+    wsi:applies_to wsi:Algorithm_iBOT .
+
+wsi:Parameter_Patch_Size_512x512 rdf:type wsi:Parameter ;
+    wsi:has_value "512x512" ;
+    wsi:applies_to wsi:Algorithm_iBOT .
+
+wsi:Parameter_Field_Of_View_8192x8192_at_20x rdf:type wsi:Parameter ;
+    wsi:has_value "8192x8192 at 20x magnification" ;
+    wsi:applies_to wsi:Algorithm_iBOT .
+
+wsi:Parameter_Tissue_Grouping_By_Spatial_Proximity rdf:type wsi:Parameter ;
+    wsi:has_value "group tissue contours by spatial proximity" ;
+    wsi:applies_to wsi:Algorithm_iBOT .
+
+wsi:Parameter_Tissue_Group_Min_Patches_16 rdf:type wsi:Parameter ;
+    wsi:has_value "minimum 16 patches per tissue group" ;
+    wsi:applies_to wsi:Algorithm_iBOT .
+
+wsi:Parameter_Local_Batch_Size_196 rdf:type wsi:Parameter ;
+    wsi:has_value "196" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Effective_Batch_Size_3136 rdf:type wsi:Parameter ;
+    wsi:has_value "3136" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Num_GPUs_8 rdf:type wsi:Parameter ;
+    wsi:has_value "8" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_GPU_Type_A100_80GB rdf:type wsi:Parameter ;
+    wsi:has_value "NVIDIA A100 80GB" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Synthetic_Caption_Generation_PathChat rdf:type wsi:Parameter ;
+    wsi:has_value "PathChat for detailed morphological descriptions" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Caption_Diversification_Qwen2_7B_Instruct rdf:type wsi:Parameter ;
+    wsi:has_value "Qwen2-7B-Instruct for caption rewriting" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Caption_Sampling_423122_ROIs rdf:type wsi:Parameter ;
+    wsi:has_value "423,122 ROIs" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_ROI_Size_8192x8192 rdf:type wsi:Parameter ;
+    wsi:has_value "8192x8192" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Patch_Size_1024x1024 rdf:type wsi:Parameter ;
+    wsi:has_value "1024x1024" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Patch_Clustering_KMeans_K16 rdf:type wsi:Parameter ;
+    wsi:has_value "K-means clustering with K=16" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Attentional_Pooler_1_Query_Contrastive rdf:type wsi:Parameter ;
+    wsi:has_value "1 contrastive query" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Attentional_Pooler_128_Queries_Reconstruction rdf:type wsi:Parameter ;
+    wsi:has_value "128 reconstruction queries" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Text_Encoder_CONCHv1_5 rdf:type wsi:Parameter ;
+    wsi:has_value "CONCHv1.5" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Multimodal_Decoder_CONCHv1_5 rdf:type wsi:Parameter ;
+    wsi:has_value "CONCHv1.5" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Local_Batch_Size_16 rdf:type wsi:Parameter ;
+    wsi:has_value "16" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Effective_Batch_Size_256 rdf:type wsi:Parameter ;
+    wsi:has_value "256" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Report_Cleaning_Qwen2_7B_Instruct rdf:type wsi:Parameter ;
+    wsi:has_value "Qwen2-7B-Instruct for slide-specific report extraction and de-identification" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Report_Rewriting_Qwen2_7B_Instruct rdf:type wsi:Parameter ;
+    wsi:has_value "Qwen2-7B-Instruct for report text diversification" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Report_Sampling_182862_Pairs rdf:type wsi:Parameter ;
+    wsi:has_value "182,862 slide-report pairs" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Slide_Crop_Size_64x64_Feature_Grids rdf:type wsi:Parameter ;
+    wsi:has_value "64x64 feature grids" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Field_Of_View_32768x32768_at_20x rdf:type wsi:Parameter ;
+    wsi:has_value "32,768x32,768 at 20x magnification" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Vision_Backbone_oursv rdf:type wsi:Parameter ;
+    wsi:has_value "oursv (unimodal slide encoder)" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Slow_Warmup_Vision_Backbone rdf:type wsi:Parameter ;
+    wsi:has_value "slow warm-up for vision backbone" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Small_Learning_Rate_Vision_Backbone rdf:type wsi:Parameter ;
+    wsi:has_value "small learning rate for vision backbone" ;
+    wsi:applies_to wsi:Algorithm_CoCa .
+
+wsi:Parameter_Small_Weight_Decay_Vision_Backbone rdf:type wsi:Parameter ;
+    wsi:has_value "small weight decay for vision backbone" ;
+    wsi:applies_to wsi:Algorithm_CoCa .

@@ -19,7 +19,7 @@ wsi:PatchGCN_Segmentation rdf:type wsi:Step_Application ;
 
 wsi:PatchGCN_Patch_Extraction rdf:type wsi:Step_Application ;
     wsi:ofStep wsi:Patch_Extraction ;
-    wsi:hasInputData wsi:Whole_Slide_Image 
+    wsi:hasInputData wsi:Whole_Slide_Image ;
     wsi:hasOutputData wsi:Patches ;
     wsi:hasOutputData wsi:Spatial_XY_Coordinates ;
     wsi:usesAlgorithm wsi:Patch_Extraction_Algorithm ;
@@ -103,7 +103,8 @@ wsi:Global_Attention_based_Pooling rdf:type wsi:Algorithm ;
     wsi:hasParameter wsi:Softmax_Normalization .
 
 wsi:Whole_Slide_Image rdf:type wsi:Data_Content .
-wsi:Patches_256x256 rdf:type wsi:Data_Content .
+wsi:Segmentation_Mask rdf:type wsi:Data_Content .
+wsi:Patches rdf:type wsi:Data_Content .
 wsi:Spatial_XY_Coordinates rdf:type wsi:Data_Content .
 wsi:1024_Feature_Embedding rdf:type wsi:Data_Content .
 wsi:Adjacency_Matrix rdf:type wsi:Data_Content .

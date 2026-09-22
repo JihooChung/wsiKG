@@ -1,0 +1,166 @@
+wsi:Patch_GCN_Research_Paper rdf:type wsi:Research_Paper ;
+    wsi:hasPurpose "To develop a context-aware, spatially-resolved patch-based graph convolutional network (Patch-GCN) for survival outcome prediction in whole slide images (WSIs), enabling hierarchical aggregation of instance-level histology features to model local- and global-level topological structures in the tumor microenvironment." ;
+    wsi:hasGithubRepo "https://github.com/mahmoodlab/Patch-GCN" ;
+    wsi:hasMethodology wsi:Patch_GCN_StepApplication_1 ;
+    wsi:hasStepApplication wsi:Patch_GCN_StepApplication_1 ;
+    wsi:hasStepApplication wsi:Patch_GCN_StepApplication_2 ;
+    wsi:hasStepApplication wsi:Patch_GCN_StepApplication_3 ;
+    wsi:hasStepApplication wsi:Patch_GCN_StepApplication_4 ;
+    wsi:hasStepApplication wsi:Patch_GCN_StepApplication_5 .
+
+wsi:Patch_GCN_StepApplication_1 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:WSI_Graph_Construction ;
+    wsi:hasInputData wsi:Raw_WSI_Data ;
+    wsi:hasOutputData wsi:WSI_Graph ;
+    wsi:usesAlgorithm wsi:WSI_Graph_Construction_Algorithm ;
+    wsi:nextStepApplication wsi:Patch_GCN_StepApplication_2 .
+
+wsi:Patch_GCN_StepApplication_2 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Patch_GCN_Architecture ;
+    wsi:hasInputData wsi:WSI_Graph ;
+    wsi:hasOutputData wsi:Hierarchical_Feature_Representation ;
+    wsi:usesAlgorithm wsi:Patch_GCN_Message_Passing_Algorithm ;
+    wsi:nextStepApplication wsi:Patch_GCN_StepApplication_3 .
+
+wsi:Patch_GCN_StepApplication_3 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Patch_GCN_Architecture ;
+    wsi:hasInputData wsi:Hierarchical_Feature_Representation ;
+    wsi:hasOutputData wsi:Global_Attention_Pooled_Embedding ;
+    wsi:usesAlgorithm wsi:Global_Neighborhood_Aggregation_Algorithm ;
+    wsi:nextStepApplication wsi:Patch_GCN_StepApplication_4 .
+
+wsi:Patch_GCN_StepApplication_4 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Global_Neighborhood_Aggregation ;
+    wsi:hasInputData wsi:Global_Attention_Pooled_Embedding ;
+    wsi:hasOutputData wsi:Survival_Prediction_Output ;
+    wsi:usesAlgorithm wsi:Cox_Proportional_Hazards_Loss_Algorithm ;
+    wsi:nextStepApplication wsi:Patch_GCN_StepApplication_5 .
+
+wsi:Patch_GCN_StepApplication_5 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Model_Training ;
+    wsi:hasInputData wsi:Survival_Prediction_Output ;
+    wsi:hasOutputData wsi:Trained_Patch_GCN_Model ;
+    wsi:usesAlgorithm wsi:Adam_Optimization_Algorithm ;
+    wsi:nextStepApplication wsi:Patch_GCN_StepApplication_1 .
+
+wsi:WSI_Graph_Construction rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Preprocessing .
+
+wsi:Patch_GCN_Architecture rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Feature_Extraction .
+
+wsi:Global_Neighborhood_Aggregation rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Aggregation .
+
+wsi:Model_Training rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Training .
+
+wsi:WSI_Graph_Construction_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:HSV_Colorspace_Transformation ;
+    wsi:hasParameter wsi:Otsu_Binarization ;
+    wsi:hasParameter wsi:Patch_Size_256x256 ;
+    wsi:hasParameter wsi:ResNet50_Backbone ;
+    wsi:hasParameter wsi:Feature_Dimension_1024 ;
+    wsi:hasParameter wsi:K_NN_k_8 ;
+    wsi:hasParameter wsi:Receptive_Field_3x3 .
+
+wsi:Patch_GCN_Message_Passing_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Message_Construction_Function ;
+    wsi:hasParameter wsi:Permutation_Invariant_Aggregation ;
+    wsi:hasParameter wsi:Update_Function ;
+    wsi:hasParameter wsi:ReLU_Activation ;
+    wsi:hasParameter wsi:Softmax_Aggregation ;
+    wsi:hasParameter wsi:Attention_Weighting ;
+    wsi:hasParameter wsi:Residual_Connection ;
+    wsi:hasParameter wsi:Layer_Count_4 ;
+    wsi:hasParameter wsi:Hop_Neighborhood_4 .
+
+wsi:Global_Neighborhood_Aggregation_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Global_Attention_Pooling ;
+    wsi:hasParameter wsi:Adaptive_Weighted_Sum ;
+    wsi:hasParameter wsi:Attention_Weights_from_AttnMIL .
+
+wsi:Cox_Proportional_Hazards_Loss_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Cox_Loss_Function ;
+    wsi:hasParameter wsi:Cross_Entropy_Based_Loss .
+
+wsi:Adam_Optimization_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Learning_Rate_2e-4 ;
+    wsi:hasParameter wsi:Weight_Decay_1e-5 ;
+    wsi:hasParameter wsi:Batch_Size_1 ;
+    wsi:hasParameter wsi:Gradient_Accumulation_Steps_32 ;
+    wsi:hasParameter wsi:Epochs_20 .
+
+wsi:Raw_WSI_Data rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:SVS .
+
+wsi:WSI_Graph rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:Hierarchical_Feature_Representation rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:Global_Attention_Pooled_Embedding rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:Survival_Prediction_Output rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:Trained_Patch_GCN_Model rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:PyTorch .
+
+wsi:SVS rdf:type wsi:Data_Format .
+
+wsi:H5 rdf:type wsi:Data_Format .
+
+wsi:HSV_Colorspace_Transformation rdf:type wsi:Parameter .
+
+wsi:Otsu_Binarization rdf:type wsi:Parameter .
+
+wsi:Patch_Size_256x256 rdf:type wsi:Parameter .
+
+wsi:ResNet50_Backbone rdf:type wsi:Parameter .
+
+wsi:Feature_Dimension_1024 rdf:type wsi:Parameter .
+
+wsi:K_NN_k_8 rdf:type wsi:Parameter .
+
+wsi:Receptive_Field_3x3 rdf:type wsi:Parameter .
+
+wsi:Message_Construction_Function rdf:type wsi:Parameter .
+
+wsi:Permutation_Invariant_Aggregation rdf:type wsi:Parameter .
+
+wsi:Update_Function rdf:type wsi:Parameter .
+
+wsi:ReLU_Activation rdf:type wsi:Parameter .
+
+wsi:Softmax_Aggregation rdf:type wsi:Parameter .
+
+wsi:Attention_Weighting rdf:type wsi:Parameter .
+
+wsi:Residual_Connection rdf:type wsi:Parameter .
+
+wsi:Layer_Count_4 rdf:type wsi:Parameter .
+
+wsi:Hop_Neighborhood_4 rdf:type wsi:Parameter .
+
+wsi:Global_Attention_Pooling rdf:type wsi:Parameter .
+
+wsi:Adaptive_Weighted_Sum rdf:type wsi:Parameter .
+
+wsi:Attention_Weights_from_AttnMIL rdf:type wsi:Parameter .
+
+wsi:Cox_Loss_Function rdf:type wsi:Parameter .
+
+wsi:Cross_Entropy_Based_Loss rdf:type wsi:Parameter .
+
+wsi:Learning_Rate_2e-4 rdf:type wsi:Parameter .
+
+wsi:Weight_Decay_1e-5 rdf:type wsi:Parameter .
+
+wsi:Batch_Size_1 rdf:type wsi:Parameter .
+
+wsi:Gradient_Accumulation_Steps_32 rdf:type wsi:Parameter .
+
+wsi:Epochs_20 rdf:type wsi:Parameter .

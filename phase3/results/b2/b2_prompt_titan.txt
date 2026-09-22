@@ -1,0 +1,147 @@
+wsi:Research_Paper_TITAN rdf:type wsi:Research_Paper ;
+    wsi:hasPurpose "To propose $\ours$, a multimodal whole slide foundation model pretrained on 335,645 WSIs via visual self-supervised learning and vision-language alignment with synthetic and real pathology reports, enabling general-purpose slide representations and pathology report generation without finetuning, particularly effective in resource-limited clinical scenarios such as rare disease retrieval and cancer prognosis." ;
+    wsi:hasGithubRepo "https://github.com/mahmoodlab/TITAN" ;
+    wsi:hasMethodology wsi:Step_Application_Unimodal_Visual_Pretraining ;
+    wsi:hasStepApplication wsi:Step_Application_Unimodal_Visual_Pretraining ;
+    wsi:hasStepApplication wsi:Step_Application_Vision_Language_Continual_Pretraining_Stage2 ;
+    wsi:hasStepApplication wsi:Step_Application_Vision_Language_Continual_Pretraining_Stage3 .
+
+wsi:Step_Application_Unimodal_Visual_Pretraining rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Unimodal_Visual_Pretraining ;
+    wsi:hasInputData wsi:Mass_340K_WSI_Dataset ;
+    wsi:hasOutputData wsi:Slide_Representation_Model_oursv ;
+    wsi:usesAlgorithm wsi:IBOT_Algorithm ;
+    wsi:nextStepApplication wsi:Step_Application_Vision_Language_Continual_Pretraining_Stage2 .
+
+wsi:Step_Application_Vision_Language_Continual_Pretraining_Stage2 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Vision_Language_Continual_Pretraining_Stage2 ;
+    wsi:hasInputData wsi:Synthetic_Captions_Dataset ;
+    wsi:hasOutputData wsi:Vision_Language_Model_oursvcr_Stage2 ;
+    wsi:usesAlgorithm wsi:CoCa_Algorithm ;
+    wsi:nextStepApplication wsi:Step_Application_Vision_Language_Continual_Pretraining_Stage3 .
+
+wsi:Step_Application_Vision_Language_Continual_Pretraining_Stage3 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Vision_Language_Continual_Pretraining_Stage3 ;
+    wsi:hasInputData wsi:Slide_Report_Dataset ;
+    wsi:hasOutputData wsi:Vision_Language_Model_oursvcr ;
+    wsi:usesAlgorithm wsi:CoCa_Algorithm .
+
+wsi:Unimodal_Visual_Pretraining rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Pretraining_Stage_1 .
+
+wsi:Vision_Language_Continual_Pretraining_Stage2 rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Pretraining_Stage_2 .
+
+wsi:Vision_Language_Continual_Pretraining_Stage3 rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Pretraining_Stage_3 .
+
+wsi:IBOT_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:IBOT_Learning_Rate ;
+    wsi:hasParameter wsi:IBOT_Weight_Decay ;
+    wsi:hasParameter wsi:IBOT_Batch_Size ;
+    wsi:hasParameter wsi:IBOT_Epochs ;
+    wsi:hasParameter wsi:IBOT_Vision_Transformer_Layers ;
+    wsi:hasParameter wsi:IBOT_Attention_Heads ;
+    wsi:hasParameter wsi:IBOT_Embedding_Dimension ;
+    wsi:hasParameter wsi:IBOT_Hidden_Dimension ;
+    wsi:hasParameter wsi:IBOT_Positional_Encoding ;
+    wsi:hasParameter wsi:IBOT_View_Generation ;
+    wsi:hasParameter wsi:IBOT_Token_Size .
+
+wsi:CoCa_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:CoCa_Learning_Rate ;
+    wsi:hasParameter wsi:CoCa_Weight_Decay ;
+    wsi:hasParameter wsi:CoCa_Batch_Size ;
+    wsi:hasParameter wsi:CoCa_Epochs ;
+    wsi:hasParameter wsi:CoCa_Image_Encoder ;
+    wsi:hasParameter wsi:CoCa_Text_Encoder ;
+    wsi:hasParameter wsi:CoCa_Multimodal_Decoder ;
+    wsi:hasParameter wsi:CoCa_Attentional_Pooler_Queries ;
+    wsi:hasParameter wsi:CoCa_Contrastive_Query ;
+    wsi:hasParameter wsi:CoCa_Reconstruction_Queries .
+
+wsi:Mass_340K_WSI_Dataset rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:SVS .
+
+wsi:Synthetic_Captions_Dataset rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:JSON .
+
+wsi:Slide_Report_Dataset rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:TXT .
+
+wsi:Slide_Representation_Model_oursv rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:Vision_Language_Model_oursvcr rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:Vision_Language_Model_oursvcr_Stage2 rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:SVS rdf:type wsi:Data_Format .
+wsi:H5 rdf:type wsi:Data_Format .
+wsi:JSON rdf:type wsi:Data_Format .
+wsi:TXT rdf:type wsi:Data_Format .
+
+wsi:IBOT_Learning_Rate rdf:type wsi:Parameter ;
+    wsi:hasValue "1e-4" .
+
+wsi:IBOT_Weight_Decay rdf:type wsi:Parameter ;
+    wsi:hasValue "0.05" .
+
+wsi:IBOT_Batch_Size rdf:type wsi:Parameter ;
+    wsi:hasValue "1024" .
+
+wsi:IBOT_Epochs rdf:type wsi:Parameter ;
+    wsi:hasValue "270" .
+
+wsi:IBOT_Vision_Transformer_Layers rdf:type wsi:Parameter ;
+    wsi:hasValue "6" .
+
+wsi:IBOT_Attention_Heads rdf:type wsi:Parameter ;
+    wsi:hasValue "12" .
+
+wsi:IBOT_Embedding_Dimension rdf:type wsi:Parameter ;
+    wsi:hasValue "768" .
+
+wsi:IBOT_Hidden_Dimension rdf:type wsi:Parameter ;
+    wsi:hasValue "3072" .
+
+wsi:IBOT_Positional_Encoding rdf:type wsi:Parameter ;
+    wsi:hasValue "2D_ALiBi" .
+
+wsi:IBOT_View_Generation rdf:type wsi:Parameter ;
+    wsi:hasValue "14x14 global views, 6x6 local views from 8192x8192 region crops" .
+
+wsi:IBOT_Token_Size rdf:type wsi:Parameter ;
+    wsi:hasValue "16x16" .
+
+wsi:CoCa_Learning_Rate rdf:type wsi:Parameter ;
+    wsi:hasValue "1e-4" .
+
+wsi:CoCa_Weight_Decay rdf:type wsi:Parameter ;
+    wsi:hasValue "0.05" .
+
+wsi:CoCa_Batch_Size rdf:type wsi:Parameter ;
+    wsi:hasValue "3136 (Stage 2), 256 (Stage 3)" .
+
+wsi:CoCa_Epochs rdf:type wsi:Parameter ;
+    wsi:hasValue "100 (Stage 2), 100 (Stage 3)" .
+
+wsi:CoCa_Image_Encoder rdf:type wsi:Parameter ;
+    wsi:hasValue "oursv (ViT-based, 6 layers, 768 dim)" .
+
+wsi:CoCa_Text_Encoder rdf:type wsi:Parameter ;
+    wsi:hasValue "CONCHv1.5 (12 layers, 768 dim)" .
+
+wsi:CoCa_Multimodal_Decoder rdf:type wsi:Parameter ;
+    wsi:hasValue "CONCHv1.5 (12 layers, 768 dim)" .
+
+wsi:CoCa_Attentional_Pooler_Queries rdf:type wsi:Parameter ;
+    wsi:hasValue "128 reconstruction queries" .
+
+wsi:CoCa_Contrastive_Query rdf:type wsi:Parameter ;
+    wsi:hasValue "1 contrastive query" .
+
+wsi:CoCa_Reconstruction_Queries rdf:type wsi:Parameter ;
+    wsi:hasValue "128 reconstruction queries" .

@@ -1,0 +1,9 @@
+relation
+wsi:applies_step
+wsi:applies_to
+wsi:has_description
+wsi:has_name
+wsi:has_shared_WSI_processing_step
+wsi:has_stage
+wsi:has_start_of_Methodology
+wsi:has_value

@@ -4,9 +4,10 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--phase", type=str, default="phase3")
+parser.add_argument("--step", type=str, default="b4")
 parser.add_argument("--model", type=str, default="qwen3-30b-a3b-instruct-2507")
 
-parser.add_argument("--input_type", type=str, default="titan")
+parser.add_argument("--input_type", type=str, default="panther")
 parser.add_argument("--prompt_type", type=str, default="final_prompt")
 
 parser.add_argument("--api_key_path", type=str, default="./archive/apikey.txt")
@@ -18,7 +19,7 @@ model = args.model
 
 input_path = Path(f"./data/{args.phase}/{args.input_type}.txt")
 prompt_path = Path(f"./{args.phase}/prompt/{args.prompt_type}.txt")
-out_path = Path(f"./{args.phase}/results/{args.prompt_type}_{args.input_type}_{args.model}.ttl")
+out_path = Path(f"./{args.phase}/results/{args.step}/{args.prompt_type}_{args.input_type}_{args.model}.ttl")
 
 with open(args.api_key_path, "r", encoding="utf-8") as file:
     api_key = file.read().strip()
@@ -36,20 +37,32 @@ headers = {
     "inference-service": "saia-openai-gateway",
 }
 
-data = {
-    "model": model,
-    "messages": [
-        {"role": "system", "content": prompt},
-        {"role": "user", "content": input},
-    ],
-    "enable-tools": True,
-    "arcana": {
-        "id": "jihoo.chung01/nthpda3"
-    },
-    "temperature": 0.0,
-    "top_p": 0.05,
-}
+if args.step == "b4":
+    data = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": input},
+        ],
+        "enable-tools": True,
+        "arcana": {
+            "id": "jihoo.chung01/nthpda3"
+        },
+        "temperature": 0.0,
+        "top_p": 0.05,
+    }
 
+else:
+    data = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": input},
+        ],
+        "enable-tools": False,
+        "temperature": 0.0,
+        "top_p": 0.05,
+    }
 
 try:
     response = requests.post(url, headers=headers, json=data)

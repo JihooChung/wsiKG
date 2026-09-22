@@ -1,0 +1,119 @@
+wsi:Research_Paper_Ours rdf:type wsi:Research_Paper ;
+    wsi:hasPurpose "To introduce an unsupervised, prototype-based slide representation learning framework using Gaussian Mixture Models (GMM) for whole-slide images (WSIs), enabling task-agnostic, interpretable, and generalizable representations that outperform supervised MIL baselines on subtyping and survival tasks." ;
+    wsi:hasGithubRepo "https://github.com/mahmoodlab/Panther" ;
+    wsi:hasMethodology wsi:Ours_StepApplication_1 ;
+    wsi:hasStepApplication wsi:Ours_StepApplication_1 ;
+    wsi:hasStepApplication wsi:Ours_StepApplication_2 ;
+    wsi:hasStepApplication wsi:Ours_StepApplication_3 ;
+    wsi:hasStepApplication wsi:Ours_StepApplication_4 .
+
+wsi:Ours_StepApplication_1 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:WSI_Patch_Tessellation ;
+    wsi:hasInputData wsi:Whole_Slide_Image ;
+    wsi:hasOutputData wsi:WSI_Patches ;
+    wsi:usesAlgorithm wsi:Patch_Tessellation_Algorithm ;
+    wsi:nextStepApplication wsi:Ours_StepApplication_2 .
+
+wsi:Ours_StepApplication_2 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Feature_Extraction ;
+    wsi:hasInputData wsi:WSI_Patches ;
+    wsi:hasOutputData wsi:Patch_Embeddings ;
+    wsi:usesAlgorithm wsi:Feature_Extractor_Algorithm ;
+    wsi:nextStepApplication wsi:Ours_StepApplication_3 .
+
+wsi:Ours_StepApplication_3 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Prototype_Based_Aggregation ;
+    wsi:hasInputData wsi:Patch_Embeddings ;
+    wsi:hasOutputData wsi:Slide_Embedding ;
+    wsi:usesAlgorithm wsi:GMM_Aggregation_Algorithm ;
+    wsi:nextStepApplication wsi:Ours_StepApplication_4 .
+
+wsi:Ours_StepApplication_4 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Downstream_Task_Prediction ;
+    wsi:hasInputData wsi:Slide_Embedding ;
+    wsi:hasOutputData wsi:Prediction_Output ;
+    wsi:usesAlgorithm wsi:Structured_MLP_Predictor_Algorithm .
+
+wsi:WSI_Patch_Tessellation rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Preprocessing .
+
+wsi:Feature_Extraction rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Feature_Extraction .
+
+wsi:Prototype_Based_Aggregation rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Aggregation .
+
+wsi:Downstream_Task_Prediction rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Downstream_Task .
+
+wsi:Patch_Tessellation_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Patch_Size ;
+    wsi:hasParameter wsi:Non_Overlapping_Patches .
+
+wsi:Feature_Extractor_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Feature_Extractor_Model ;
+    wsi:hasParameter wsi:Pretrained_Dataset .
+
+wsi:GMM_Aggregation_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:GMM_Components ;
+    wsi:hasParameter wsi:EM_Iterations ;
+    wsi:hasParameter wsi:Diagonal_Covariance ;
+    wsi:hasParameter wsi:Prototype_Initialization_Method .
+
+wsi:Structured_MLP_Predictor_Algorithm rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Per_Prototype_Mapping ;
+    wsi:hasParameter wsi:Nonlinearity_Type ;
+    wsi:hasParameter wsi:Prediction_Head_Type .
+
+wsi:Whole_Slide_Image rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:SVS .
+
+wsi:WSI_Patches rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:PNG .
+
+wsi:Patch_Embeddings rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:Slide_Embedding rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:Prediction_Output rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:CSV .
+
+wsi:SVS rdf:type wsi:Data_Format .
+wsi:PNG rdf:type wsi:Data_Format .
+wsi:H5 rdf:type wsi:Data_Format .
+wsi:CSV rdf:type wsi:Data_Format .
+
+wsi:Patch_Size rdf:type wsi:Parameter ;
+    wsi:hasValue "256x256 pixels" .
+
+wsi:Non_Overlapping_Patches rdf:type wsi:Parameter ;
+    wsi:hasValue "True" .
+
+wsi:Feature_Extractor_Model rdf:type wsi:Parameter ;
+    wsi:hasValue "UNI (ViT-L/16 DINOv2)" .
+
+wsi:Pretrained_Dataset rdf:type wsi:Parameter ;
+    wsi:hasValue "1×10⁸ patches from 1×10⁶ WSIs" .
+
+wsi:GMM_Components rdf:type wsi:Parameter ;
+    wsi:hasValue "C = 8 to 32" .
+
+wsi:EM_Iterations rdf:type wsi:Parameter ;
+    wsi:hasValue "1 (sufficient for convergence)" .
+
+wsi:Diagonal_Covariance rdf:type wsi:Parameter ;
+    wsi:hasValue "True" .
+
+wsi:Prototype_Initialization_Method rdf:type wsi:Parameter ;
+    wsi:hasValue "K-means clustering on cohort-aggregated patch embeddings" .
+
+wsi:Per_Prototype_Mapping rdf:type wsi:Parameter ;
+    wsi:hasValue "Individual nonlinear mapping per prototype" .
+
+wsi:Nonlinearity_Type rdf:type wsi:Parameter ;
+    wsi:hasValue "Identity, Linear, or MLP" .
+
+wsi:Prediction_Head_Type rdf:type wsi:Parameter ;
+    wsi:hasValue "Linear or MLP" .

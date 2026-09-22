@@ -1,0 +1,147 @@
+wsi:Research_Paper_1 rdf:type wsi:Research_Paper ;
+    wsi:has_Methodology_Start wsi:Application_of_Step_1 .
+
+wsi:Application_of_Step_1 rdf:type wsi:Application_of_Step ;
+    wsi:applies wsi:WSI_Graph_Construction ;
+    wsi:has_Execution_Order 1 ;
+    wsi:is_Part_Of wsi:Research_Paper_1 .
+
+wsi:Application_of_Step_2 rdf:type wsi:Application_of_Step ;
+    wsi:applies wsi:Patch_GCN_Architecture ;
+    wsi:has_Execution_Order 2 ;
+    wsi:is_Part_Of wsi:Research_Paper_1 .
+
+wsi:Application_of_Step_3 rdf:type wsi:Application_of_Step ;
+    wsi:applies wsi:Global_Neighborhood_Aggregation_and_Supervision ;
+    wsi:has_Execution_Order 3 ;
+    wsi:is_Part_Of wsi:Research_Paper_1 .
+
+wsi:WSI_Graph_Construction rdf:type wsi:WSI_Processing_Step ;
+    wsi:belongs_to_stage wsi:WSI_Preprocessing ;
+    wsi:has_Description "For a given sample, let patient $P$, overall survival time $T$ and censorship status $C$ be a single triplet observation in a dataset $\{P_i, T_i, C_i\}_{i=1}^N$. In addition, let $\{W_{j}\}_{j=1}^K \in P$ be the set of all WSIs for $P$, as there may exist multiple WSIs collected for a single patient. To construct graph $G$ for $P$, we first perform automatic tissue segmentation for all $W_j$ by: 1) transforming a low-downsampled version of $W_j$ into HSV colorspace, and then 2) using Otsu's Binarization on the saturation channel to separate H\&E-stained tissue from the background. Then, non-overlapping $256 \times 256$ instance-level image regions at $20\times$ magnification are patched and used as input for a truncated ResNet-50 model pretrained on ImageNet, which extracts a 1024-dimensional feature vector $h \in \mathbb{R}^{1024}$ via spatial average pooling after the 3rd residual block and is then packed into a node feature matrix $X_{j} \in \mathbb{R}^{m \times 1024}$ for $M_j$ total patches in $W_{j}$. For each patch, we save (x,y)-coordinates from the tissue segmentation, from which we use to build an adjacency matrix $A_{j}$ for each $W_{j}$ via fast approximate k-NN $(k=8)$ that models a $3 \times 3$ image receptive field in CNN convolutions. Finally, we build a subgraph $G_{j} = (X_{j}, A_{j})$, with the patient-level graph across all WSIs constructed as $G = \{G_j\}_{j=1}$ which we denote as a WSI-Graph." .
+
+wsi:Patch_GCN_Architecture rdf:type wsi:WSI_Processing_Step ;
+    wsi:belongs_to_stage wsi:Feature_Extraction ;
+    wsi:has_Description "For a WSI-Graph $G$ with $M$ instances, we learn a differentiable function $\mathcal{F}_{\text{GCN}}: \mathbb{R}^{M \times d_{in}} \rightarrow \mathbb{R}^{M \times d_{out}}$ parameterized using a GCN that iteratively aggregates and combines node features in their spatial neighborhoods across different hidden layers via message passing. For instance, for the message passing of vertex $v$ (that has node feature $\mathbf{h}_{v}$) with its neighboring vertices $u \in \mathcal{N}(v)$ in hidden layer $G^{(l)}$, we use the graph convolution layer $\mathcal{F}_{\text{GCN}}^{(l)}(G^{(l)}; \phi^{(l)}, \rho^{(l)}, \zeta^{(l)})$ that implement the following functions: $\textbf{m}_{v}^{(l)}=\rho^{(l)}\left(\left\{\phi^{(l)}\left(\mathbf{h}_{v}^{(l)}, \mathbf{h}_{u}^{(l)}, \mathbf{h}_{e_{v u}}^{(l)}\right) \rightarrow \mathbf{m}_{v u}^{(l)}: u \in \mathcal{N}(v)\right\}\right)$ and $\textbf{h}_{v}^{(l+1)}=\zeta^{(l)}\left(\mathbf{h}_{v}^{(l)}, \mathbf{m}_{v}^{(l)}\right)$. The functions $\phi^{(l)}, \rho^{(l)}, \zeta^{(l)}$ are implemented as: $\phi^{(l)}\left(\mathbf{h}_{v}^{(l)}, \mathbf{h}_{u}^{(l)}, \mathbf{h}_{e_{v u}}^{(l)}\right) = \operatorname{ReLU}\left(\mathbf{h}_{u}^{(l)}+\mathbf{1}\left(\mathbf{h}_{e_{v u}}^{(l)}\right) \cdot \mathbf{h}_{e_{v u}}^{(l)}\right)+\epsilon$, $\rho^{(l)}\left(\left\{\mathbf{m}_{v u}^{(l)}: \forall u \in \mathcal{N}(v)\right\}\right) = \sum_{u \in \mathcal{N}(v)} \frac{\exp \left(\beta \mathbf{m}_{v u}^{(l)}\right)}{\sum_{u \in \mathcal{N}(v)} \exp \left(\beta \mathbf{m}_{v u}^{(l)}\right)} \cdot \mathbf{m}_{v u}^{(l)}$, and $\zeta^{(l)}\left(\mathbf{h}_{v}^{(l)}, \mathbf{m}_{v}^{(l)}\right) = \mathbf{M L P}\left(\mathbf{h}_{v}^{(l)}+\mathbf{m}_{v}^{(l)}\right)$. We implement the spatial neighborhood aggregation backbone of Patch-GCN using $L=4$ graph convolutional layers. As a result, each patch-based histology image feature aggregates features from other nodes in a 4-hop neighborhood, which results in an effective image receptive field size of $2302 \times 2302$ for $256 \times 256$ patches connected to its 8 nearest neighbors. Additionally, we implement dense connections from the output of every GCN Layer to the last hidden layer of $\mathcal{F}_{\text{GCN}}$, so that the representation of each histology patch would be an amalgamation of its instance-level embedding and its learned surrounding context, written as $\mathbf{H}^{(L)} = [X^{(1)}, \dots ,X^{(L)}]$." .
+
+wsi:Global_Neighborhood_Aggregation_and_Supervision rdf:type wsi:WSI_Processing_Step ;
+    wsi:belongs_to_stage wsi:Prediction ;
+    wsi:has_Description "From the penultimate node feature matrix $\mathbf{H}^{(L)}$, following \cite{ilse2018attention}, we learn a global attention-based pooling layer $\mathcal{F}_{\text{AttnMIL}}(\mathbf{H}^{(L)}; \phi^{(L)}, \rho^{(L)})$ that adaptively computes a weighted sum of all node features in the graph, which generalizes aggregation function in Equation 2 to function on all nodes in the graph, in which the node feature matrix for the last hidden layer $\mathbf{H}^{(L)} \in \mathbb{R}^{m \times d_{\text{out}}}$ is pooled to a WSI-level embedding $\mathbf{h}_m^{(L)} \in \mathbb{R}^{1 \times d_{\text{out}}}$, which is subsequently supervised using the cross entropy-based Cox proportional loss function following \cite{zadeh2020bias} for survival analysis." .
+
+wsi:WSI_Preprocessing rdf:type wsi:WSI_Processing_Stage .
+
+wsi:Feature_Extraction rdf:type wsi:WSI_Processing_Stage .
+
+wsi:Prediction rdf:type wsi:WSI_Processing_Stage .
+
+wsi:Application_of_Step_1 wsi:has_Algorithm wsi:ResNet50_Feature_Extractor ;
+    wsi:has_Parameter wsi:Patch_Size_256x256 ;
+    wsi:has_Parameter wsi:Downsampled_HSV_Colorspace_Transformation ;
+    wsi:has_Parameter wsi:Otsu_Binarization_Saturation_Channel ;
+    wsi:has_Parameter wsi:Fast_Approximate_kNN_k8 ;
+    wsi:has_Parameter wsi:Receptive_Field_3x3 .
+
+wsi:Application_of_Step_2 wsi:has_Algorithm wsi:Graph_Convolutional_Network ;
+    wsi:has_Parameter wsi:GCN_Layers_4 ;
+    wsi:has_Parameter wsi:Residual_Mapping ;
+    wsi:has_Parameter wsi:Dense_Connections ;
+    wsi:has_Parameter wsi:Message_Passing_Functions ;
+    wsi:has_Parameter wsi:Softmax_Aggregation ;
+    wsi:has_Parameter wsi:ReLU_Activation ;
+    wsi:has_Parameter wsi:Edge_Feature_Interaction ;
+    wsi:has_Parameter wsi:Attention_Weighting ;
+    wsi:has_Parameter wsi:Effective_Receptive_Field_2302x2302 .
+
+wsi:Application_of_Step_3 wsi:has_Algorithm wsi:Attention_Based_Pooling ;
+    wsi:has_Parameter wsi:Global_Attention_Pooling ;
+    wsi:has_Parameter wsi:Cox_Proportional_Hazards_Loss ;
+    wsi:has_Parameter wsi:Cross_Entropy_Based_Loss .
+
+wsi:ResNet50_Feature_Extractor rdf:type wsi:Algorithm ;
+    wsi:has_Description "Truncated ResNet-50 model pretrained on ImageNet, which extracts a 1024-dimensional feature vector $h \in \mathbb{R}^{1024}$ via spatial average pooling after the 3rd residual block." .
+
+wsi:Graph_Convolutional_Network rdf:type wsi:Algorithm ;
+    wsi:has_Description "Graph convolution layer $\mathcal{F}_{\text{GCN}}^{(l)}(G^{(l)}; \phi^{(l)}, \rho^{(l)}, \zeta^{(l)})$ that implements message passing via $\phi^{(l)}$, $\rho^{(l)}$, and $\zeta^{(l)}$ functions." .
+
+wsi:Attention_Based_Pooling rdf:type wsi:Algorithm ;
+    wsi:has_Description "Global attention-based pooling layer $\mathcal{F}_{\text{AttnMIL}}(\mathbf{H}^{(L)}; \phi^{(L)}, \rho^{(L)})$ that adaptively computes a weighted sum of all node features in the graph." .
+
+wsi:Patch_Size_256x256 rdf:type wsi:Parameter ;
+    wsi:has_Value "256 × 256" ;
+    wsi:has_Unit "pixels" .
+
+wsi:Downsampled_HSV_Colorspace_Transformation rdf:type wsi:Parameter ;
+    wsi:has_Value "Low-downsampled version of WSI transformed into HSV colorspace" .
+
+wsi:Otsu_Binarization_Saturation_Channel rdf:type wsi:Parameter ;
+    wsi:has_Value "Otsu's Binarization applied on saturation channel" .
+
+wsi:Fast_Approximate_kNN_k8 rdf:type wsi:Parameter ;
+    wsi:has_Value "k=8" ;
+    wsi:has_Method "Fast approximate k-NN" .
+
+wsi:Receptive_Field_3x3 rdf:type wsi:Parameter ;
+    wsi:has_Value "3 × 3" ;
+    wsi:has_Description "Models a 3 × 3 image receptive field in CNN convolutions" .
+
+wsi:GCN_Layers_4 rdf:type wsi:Parameter ;
+    wsi:has_Value "4" ;
+    wsi:has_Description "Number of graph convolutional layers" .
+
+wsi:Residual_Mapping rdf:type wsi:Parameter ;
+    wsi:has_Value "Yes" ;
+    wsi:has_Description "Each GCN layer output is added to its input (residual connection)" .
+
+wsi:Dense_Connections rdf:type wsi:Parameter ;
+    wsi:has_Value "Yes" ;
+    wsi:has_Description "Dense connections from every GCN layer output to the last hidden layer" .
+
+wsi:Message_Passing_Functions rdf:type wsi:Parameter ;
+    wsi:has_Value "φ, ρ, ζ functions" ;
+    wsi:has_Description "Message construction, aggregation, and update functions in GCN" .
+
+wsi:Softmax_Aggregation rdf:type wsi:Parameter ;
+    wsi:has_Value "Softmax-based aggregation" ;
+    wsi:has_Description "Performs attention-weighted aggregation of messages" .
+
+wsi:ReLU_Activation rdf:type wsi:Parameter ;
+    wsi:has_Value "ReLU" ;
+    wsi:has_Description "Activation function used in message construction" .
+
+wsi:Edge_Feature_Interaction rdf:type wsi:Parameter ;
+    wsi:has_Value "Additive combination of node and edge features" ;
+    wsi:has_Description "Edge features are used in message construction via indicator function" .
+
+wsi:Attention_Weighting rdf:type wsi:Parameter ;
+    wsi:has_Value "Attention weights computed via Softmax" ;
+    wsi:has_Description "Weights messages based on their relevance in neighborhood" .
+
+wsi:Effective_Receptive_Field_2302x2302 rdf:type wsi:Parameter ;
+    wsi:has_Value "2302 × 2302" ;
+    wsi:has_Description "Effective receptive field size after 4-hop aggregation" .
+
+wsi:Global_Attention_Pooling rdf:type wsi:Parameter ;
+    wsi:has_Value "Global attention-based pooling" ;
+    wsi:has_Description "Pools all node features using attention weights" .
+
+wsi:Cox_Proportional_Hazards_Loss rdf:type wsi:Parameter ;
+    wsi:has_Value "Cross-entropy-based Cox proportional loss" ;
+    wsi:has_Description "Loss function used for survival analysis" .
+
+wsi:Cross_Entropy_Based_Loss rdf:type wsi:Parameter ;
+    wsi:has_Value "Cross-entropy" ;
+    wsi:has_Description "Used in conjunction with Cox proportional hazards model" .
+
+wsi:Application_of_Step_1 wsi:has_Data wsi:WSI_Dataset_TCGA .
+
+wsi:Application_of_Step_2 wsi:has_Data wsi:WSI_Dataset_TCGA .
+
+wsi:Application_of_Step_3 wsi:has_Data wsi:WSI_Dataset_TCGA .
+
+wsi:WSI_Dataset_TCGA rdf:type wsi:Dataset ;
+    wsi:has_Name "The Cancer Genome Atlas (TCGA)" ;
+    wsi:has_Size "4,370 gigapixel WSIs" ;
+    wsi:has_Cancer_Types "Bladder Urothelial Carcinoma (BLCA), Breast Invasive Carcinoma (BRCA), Glioblastoma & Lower Grade Glioma (GBMLGG), Lung Adenocarcinoma (LUAD), Uterine Corpus Endometrial Carcinoma (UCEC)" ;
+    wsi:has_Patient_Count "4,370" ;
+    wsi:has_Patch_Count_Average "13,487 patches per WSI" ;
+    wsi:has_Max_Graph_Size "100,000 instances" .

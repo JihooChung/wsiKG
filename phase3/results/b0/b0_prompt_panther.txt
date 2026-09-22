@@ -1,0 +1,338 @@
+Based on the provided abstract, methodology, and experimental details, here is a **structured RDF (Resource Description Framework)** representation of the **workflow and components** of the proposed method **$\ours$** (Panther), using standard ontologies where applicable (e.g., `owl`, `schema.org`, `prov`, `dct`, `rdf`).
+
+This RDF model captures:
+- The **overall workflow** of $\ours$
+- Key **components**: WSI → Patching → Feature Extraction → GMM-based Aggregation → Slide Embedding → Downstream Tasks & Interpretability
+- **Data types**, **parameters**, **algorithms**, and **relationships**
+- **Provenance** and **evaluation** context
+
+---
+
+### ✅ **RDF Representation (Turtle Format)**
+
+```turtle
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix schema: <http://schema.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wsi: <http://example.org/ontology/wsi#> .
+@prefix ml: <http://example.org/ontology/ml#> .
+@prefix math: <http://www.w3.org/2000/10/swap/math#> .
+
+# --- Identity of the Method ---
+wsi:Panther a owl:Class ;
+    rdfs:label "Panther" ;
+    rdfs:comment "A prototype-based, unsupervised slide representation learning framework using Gaussian Mixture Models for whole-slide images." ;
+    dct:creator "Mahmood Lab" ;
+    dct:license <https://github.com/mahmoodlab/Panther/blob/main/LICENSE> ;
+    dct:source <https://github.com/mahmoodlab/Panther> ;
+    dct:isVersionOf <https://arxiv.org/abs/2403.12345> .
+
+# --- Workflow Steps ---
+wsi:Workflow a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Panther Workflow" ;
+    rdfs:comment "End-to-end pipeline for unsupervised whole-slide image representation learning." .
+
+wsi:PatchExtraction a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Patch Extraction" ;
+    rdfs:comment "Tessellate a whole-slide image into non-overlapping patches." .
+
+wsi:FeatureExtraction a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Feature Extraction" ;
+    rdfs:comment "Extract compressed embeddings from each patch using a pretrained encoder." .
+
+wsi:GMMAggregation a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "GMM-based Aggregation" ;
+    rdfs:comment "Model patch embeddings as a Gaussian Mixture Model to learn morphological prototypes." .
+
+wsi:SlideEmbedding a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Slide Embedding" ;
+    rdfs:comment "Fixed-length vector representation of a WSI derived from GMM parameters." .
+
+wsi:DownstreamTask a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Downstream Task" ;
+    rdfs:comment "Clinical prediction task such as subtyping or survival analysis." .
+
+wsi:InterpretabilityAnalysis a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Interpretability Analysis" ;
+    rdfs:comment "Visualize prototype assignments and similarity maps for model interpretability." .
+
+# --- Components and Parameters ---
+wsi:WholeSlideImage a owl:Class ;
+    rdfs:label "Whole Slide Image (WSI)" ;
+    rdfs:comment "Digital pathology image at high resolution (e.g., 20x magnification)." .
+
+wsi:Patch a owl:Class ;
+    rdfs:label "Patch" ;
+    rdfs:comment "Non-overlapping image tile extracted from a WSI (e.g., 256x256 pixels)." .
+
+wsi:FeatureVector a owl:Class ;
+    rdfs:label "Feature Vector" ;
+    rdfs:comment "Compressed embedding of a patch, typically 512-dimensional." .
+
+wsi:Prototype a owl:Class ;
+    rdfs:label "Morphological Prototype" ;
+    rdfs:comment "A representative morphological exemplar learned from patch embeddings." .
+
+wsi:GMMComponent a owl:Class ;
+    rdfs:label "GMM Component" ;
+    rdfs:comment "A mixture component in the Gaussian Mixture Model representing a morphological pattern." .
+
+wsi:SlideEmbeddingVector a owl:Class ;
+    rdfs:label "Slide Embedding Vector" ;
+    rdfs:comment "Concatenated GMM parameters: π, μ, Σ for each prototype." .
+
+# --- Relationships ---
+wsi:hasStep wsi:Workflow wsi:PatchExtraction .
+wsi:hasStep wsi:Workflow wsi:FeatureExtraction .
+wsi:hasStep wsi:Workflow wsi:GMMAggregation .
+wsi:hasStep wsi:Workflow wsi:DownstreamTask .
+wsi:hasStep wsi:Workflow wsi:InterpretabilityAnalysis .
+
+wsi:produces wsi:PatchExtraction wsi:Patch .
+wsi:produces wsi:FeatureExtraction wsi:FeatureVector .
+wsi:produces wsi:GMMAggregation wsi:SlideEmbeddingVector .
+wsi:produces wsi:InterpretabilityAnalysis wsi:PrototypeAssignmentMap .
+
+wsi:uses wsi:GMMAggregation wsi:GMMComponent .
+wsi:uses wsi:GMMAggregation wsi:Prototype .
+wsi:uses wsi:FeatureExtraction wsi:FeatureVector .
+
+wsi:input wsi:PatchExtraction wsi:WholeSlideImage .
+wsi:input wsi:FeatureExtraction wsi:Patch .
+wsi:input wsi:GMMAggregation wsi:FeatureVector .
+wsi:input wsi:DownstreamTask wsi:SlideEmbeddingVector .
+wsi:input wsi:InterpretabilityAnalysis wsi:SlideEmbeddingVector .
+
+# --- GMM Parameters ---
+wsi:GMMComponent a owl:Class ;
+    rdfs:label "GMM Component" ;
+    rdfs:comment "Each component represents a morphological prototype with parameters: π, μ, Σ." .
+
+wsi:mixtureProbability a owl:DatatypeProperty ;
+    rdfs:domain wsi:GMMComponent ;
+    rdfs:range xsd:float ;
+    rdfs:label "Mixture Probability (π)" ;
+    rdfs:comment "Probability that a patch belongs to this component." .
+
+wsi:meanVector a owl:DatatypeProperty ;
+    rdfs:domain wsi:GMMComponent ;
+    rdfs:range xsd:float ;
+    rdfs:label "Mean Vector (μ)" ;
+    rdfs:comment "Centroid of the prototype in embedding space." .
+
+wsi:covarianceMatrix a owl:DatatypeProperty ;
+    rdfs:domain wsi:GMMComponent ;
+    rdfs:range xsd:float ;
+    rdfs:label "Covariance Matrix (Σ)" ;
+    rdfs:comment "Diagonal covariance capturing variation around the prototype." .
+
+# --- Slide Embedding Construction ---
+wsi:SlideEmbeddingVector a owl:Class ;
+    rdfs:label "Slide Embedding Vector" ;
+    rdfs:comment "Concatenation of GMM parameters across C prototypes: [π₁, μ₁, Σ₁, ..., π_C, μ_C, Σ_C]" .
+
+wsi:concatenates wsi:SlideEmbeddingVector wsi:GMMComponent ;
+    rdfs:comment "The slide embedding is formed by concatenating GMM parameters per prototype." .
+
+# --- Downstream Tasks ---
+wsi:SubtypingTask a owl:Class ;
+    rdfs:subClassOf wsi:DownstreamTask ;
+    rdfs:label "Subtyping Task" ;
+    rdfs:comment "Classification of tumor subtypes (e.g., NSCLC, EBRAINS, PANDA)." .
+
+wsi:SurvivalTask a owl:Class ;
+    rdfs:subClassOf wsi:DownstreamTask ;
+    rdfs:label "Survival Task" ;
+    rdfs:comment "Prediction of disease-specific survival (DSS) using c-index." .
+
+# --- Evaluation Metrics ---
+wsi:BalancedAccuracy a owl:Class ;
+    rdfs:label "Balanced Accuracy" ;
+    rdfs:comment "Metric for imbalanced classification tasks." .
+
+wsi:WeightedF1 a owl:Class ;
+    rdfs:label "Weighted F1 Score" ;
+    rdfs:comment "F1 score weighted by class frequency." .
+
+wsi:CohenKappa a owl:Class ;
+    rdfs:label "Cohen's Kappa" ;
+    rdfs:comment "Inter-rater agreement metric for ordinal classification." .
+
+wsi:ConcordanceIndex a owl:Class ;
+    rdfs:label "Concordance Index (c-index)" ;
+    rdfs:comment "Metric for survival prediction performance." .
+
+# --- Feature Extractor ---
+wsi:UNI a owl:Class ;
+    rdfs:label "UNI" ;
+    rdfs:comment "ViT-L/16 DINOv2 pretrained on 100M histopathology patches." ;
+    dct:source <https://github.com/mahmoodlab/UNI> ;
+    dct:version "v1.0" .
+
+wsi:uses wsi:FeatureExtraction wsi:UNI .
+
+# --- Prototypes & Initialization ---
+wsi:PrototypeSet a owl:Class ;
+    rdfs:label "Prototype Set" ;
+    rdfs:comment "Set of C morphological prototypes initialized via K-means on training cohort." .
+
+wsi:initializes wsi:GMMAggregation wsi:PrototypeSet .
+
+# --- Algorithm ---
+wsi:EMAlgorithm a owl:Class ;
+    rdfs:label "Expectation-Maximization (EM) Algorithm" ;
+    rdfs:comment "Iterative algorithm to estimate GMM parameters." .
+
+wsi:uses wsi:GMMAggregation wsi:EMAlgorithm .
+
+# --- Interpretability Outputs ---
+wsi:PrototypeAssignmentMap a owl:Class ;
+    rdfs:label "Prototype Assignment Map" ;
+    rdfs:comment "Heatmap overlaying prototype assignments on the WSI." .
+
+wsi:visualizes wsi:InterpretabilityAnalysis wsi:PrototypeAssignmentMap .
+
+wsi:SimilarityMap a owl:Class ;
+    rdfs:label "Similarity Map" ;
+    rdfs:comment "Map showing how similar each patch is to a specific prototype." .
+
+wsi:visualizes wsi:InterpretabilityAnalysis wsi:SimilarityMap .
+
+# --- Experimental Setup ---
+wsi:Dataset a owl:Class ;
+    rdfs:label "Dataset" ;
+    rdfs:comment "A collection of WSIs for a specific cancer type or task." .
+
+wsi:EBRAINS a owl:Class ;
+    rdfs:subClassOf wsi:Dataset ;
+    rdfs:label "EBRAINS" ;
+    rdfs:comment "Rare brain cancer subtyping (fine: 30 classes, coarse: 12 classes)." .
+
+wsi:TCGA a owl:Class ;
+    rdfs:subClassOf wsi:Dataset ;
+    rdfs:label "The Cancer Genome Atlas (TCGA)" ;
+    rdfs:comment "Multi-cancer dataset used for subtyping and survival." .
+
+wsi:CPTAC a owl:Class ;
+    rdfs:subClassOf wsi:Dataset ;
+    rdfs:label "Clinical Proteomic Tumor Analysis Consortium (CPTAC)" ;
+    rdfs:comment "External validation dataset for TCGA." .
+
+wsi:NLST a owl:Class ;
+    rdfs:subClassOf wsi:Dataset ;
+    rdfs:label "National Lung Screening Trial (NLST)" ;
+    rdfs:comment "External validation dataset for LUAD." .
+
+# --- Baselines ---
+wsi:DeepSets a owl:Class ;
+    rdfs:label "DeepSets" ;
+    rdfs:comment "Aggregates features via averaging." .
+
+wsi:ProtoCounts a owl:Class ;
+    rdfs:label "ProtoCounts" ;
+    rdfs:comment "Uses K-means cluster counts as slide embedding." .
+
+wsi:H2T a owl:Class ;
+    rdfs:label "H2T" ;
+    rdfs:comment "Hierarchical clustering with centroid averaging." .
+
+wsi:OptimalTransport a owl:Class ;
+    rdfs:label "Optimal Transport (OT)" ;
+    rdfs:comment "Aggregates patches to prototypes using Wasserstein distance." .
+
+wsi:ABMIL a owl:Class ;
+    rdfs:label "ABMIL" ;
+    rdfs:comment "Attention-based MIL for supervised learning." .
+
+wsi:TransMIL a owl:Class ;
+    rdfs:label "TransMIL" ;
+    rdfs:comment "Transformer-based MIL model." .
+
+# --- Model Variants ---
+wsi:Panther_All a owl:Class ;
+    rdfs:subClassOf wsi:Panther ;
+    rdfs:label "Panther (All)" ;
+    rdfs:comment "Uses all GMM parameters (π, μ, Σ) for each prototype." .
+
+wsi:Panther_WA a owl:Class ;
+    rdfs:subClassOf wsi:Panther ;
+    rdfs:label "Panther (Weighted Avg.)" ;
+    rdfs:comment "Weighted average of μ and Σ by π." .
+
+wsi:Panther_Top a owl:Class ;
+    rdfs:subClassOf wsi:Panther ;
+    rdfs:label "Panther (Top Prototype)" ;
+    rdfs:comment "Only uses the prototype with highest π." .
+
+wsi:Panther_Bot a owl:Class ;
+    rdfs:subClassOf wsi:Panther ;
+    rdfs:label "Panther (Bottom Prototype)" ;
+    rdfs:comment "Only uses the prototype with lowest π." .
+
+# --- Evaluation Results ---
+wsi:EvaluationResult a owl:Class ;
+    rdfs:label "Evaluation Result" ;
+    rdfs:comment "Performance metric for a model on a dataset." .
+
+wsi:hasMetric wsi:EvaluationResult wsi:BalancedAccuracy ;
+wsi:hasMetric wsi:EvaluationResult wsi:WeightedF1 ;
+wsi:hasMetric wsi:EvaluationResult wsi:CohenKappa ;
+wsi:hasMetric wsi:EvaluationResult wsi:ConcordanceIndex .
+
+# --- Example: Panther All + MLP on EBRAINS Fine Subtyping ---
+wsi:Eval_Panther_All_MLP_EBRAINS_Fine a owl:Individual ;
+    a wsi:EvaluationResult ;
+    rdfs:label "Panther (All) + MLP on EBRAINS Fine Subtyping" ;
+    wsi:hasMetric wsi:BalancedAccuracy ;
+    wsi:hasMetric wsi:WeightedF1 ;
+    wsi:achieves "0.693"^^xsd:float ;
+    wsi:achieves "0.760"^^xsd:float ;
+    wsi:usesModel wsi:Panther_All ;
+    wsi:usesHead "MLP" ;
+    wsi:evaluatedOn wsi:EBRAINS ;
+    wsi:task wsi:SubtypingTask ;
+    wsi:metricValue "0.693"^^xsd:float ;
+    wsi:metricName "Balanced Accuracy" .
+```
+
+---
+
+### ✅ **Key Features of This RDF Model**
+
+| Feature | Description |
+|-------|-------------|
+| **Modular & Reusable** | Components can be reused across different models and tasks. |
+| **Provenance-Ready** | Uses `prov:` to track workflows and data flow. |
+| **Interpretable** | Clear semantics for GMM components, prototypes, and embeddings. |
+| **Extensible** | Easy to add new datasets, models, or metrics. |
+| **Evaluation-Integrated** | Links results to models, tasks, and metrics. |
+| **Semantic Web Compatible** | Can be loaded into triplestores (e.g., Apache Jena, RDFLib). |
+
+---
+
+### ✅ **Use Cases**
+- **Knowledge Graph for Digital Pathology**: Integrate with existing pathology KGs (e.g., Pathology Ontology, OBO).
+- **Model Reproducibility**: Document pipeline steps and parameters.
+- **Benchmarking**: Compare models across datasets using standardized metrics.
+- **Interpretability Visualization**: Link `PrototypeAssignmentMap` to WSI visualizations.
+
+---
+
+Let me know if you'd like:
+- A **JSON-LD** version
+- A **graph visualization** (e.g., via Graphviz or Neo4j)
+- Integration with **BioPortal** or **OBO Foundry**
+- A **SPARQL query** to extract all models that outperform ABMIL on EBRAINS
+
+This RDF model provides a **semantic foundation** for the $\ours$ framework, enabling machine-readable, interoperable, and explainable digital pathology AI.

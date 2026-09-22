@@ -1,6 +1,5 @@
 wsi:Research_Paper_Panther rdf:type wsi:Research_Paper ;
-    wsi:hasPurpose "A prototype-based approach rooted in the Gaussian mixture model that summarizes the set of WSI patches into a much smaller
-set of morphological prototypes" ;
+    wsi:hasPurpose "A prototype-based approach rooted in the Gaussian mixture model that summarizes the set of WSI patches into a much smaller set of morphological prototypes" ;
     wsi:hasGithubRepo "https://github.com/mahmoodlab/Panther" ;
     wsi:hasMethodology wsi:Panther_Patch_Extraction ;
     wsi:hasStepApplication wsi:Panther_Patch_Extraction ;
@@ -56,7 +55,7 @@ wsi:K-means rdf:type wsi:Algorithm ;
     wsi:hasParameter wsi:Number_Of_Prototypes_16 . 
 
 wsi:Gaussian_Mixture_Model_EM rdf:type wsi:Algorithm ;
-    wsi:hasParameter wsi:Diagonal_Covariance .
+    wsi:hasParameter wsi:Diagonal_Covariance ;
     wsi:hasParameter wsi:EM_Iteration .  
 
 wsi:Whole_Slide_Image rdf:type wsi:Data_Content .

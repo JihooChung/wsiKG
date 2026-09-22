@@ -64,6 +64,7 @@ wsi:TITAN_Encoder rdf:type wsi:Algorithm ;
     wsi:hasParameter wsi:ViT_Architecture .
 
 wsi:Whole_Slide_Image rdf:type wsi:Data_Content .
+wsi:Segmentation_Mask rdf:type wsi:Data_Content .
 wsi:Patches rdf:type wsi:Data_Content .
 wsi:Feature_Embedding rdf:type wsi:Data_Content .
 wsi:Slide_Representation rdf:type wsi:Data_Content .

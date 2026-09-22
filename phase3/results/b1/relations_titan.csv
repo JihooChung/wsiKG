@@ -1,0 +1,11 @@
+relation
+wsi:applies_algorithm
+wsi:applies_parameter
+wsi:applies_step
+wsi:applies_to
+wsi:belongs_to_stage
+wsi:has_application
+wsi:has_parameter
+wsi:has_start_of_methodology
+wsi:has_step
+wsi:has_value

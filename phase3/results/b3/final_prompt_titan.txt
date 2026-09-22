@@ -1,0 +1,272 @@
+wsi:Research_Paper_TITAN rdf:type wsi:Research_Paper ;
+    wsi:hasPurpose "Proposing $\ours$, a multimodal whole slide foundation model pretrained on 335,645 WSIs via visual self-supervised learning and vision-language alignment with synthetic and real pathology reports, enabling general-purpose slide representations and pathology report generation without finetuning, for tasks including rare cancer retrieval, cancer prognosis, and cross-modal retrieval." ;
+    wsi:hasGithubRepo "https://github.com/mahmoodlab/TITAN" ;
+    wsi:hasMethodology wsi:Pretraining_Step_1 ;
+    wsi:hasStepApplication wsi:Pretraining_Step_1 ;
+    wsi:hasStepApplication wsi:Synthetic_Caption_Generation ;
+    wsi:hasStepApplication wsi:Slide_Report_Curation ;
+    wsi:hasStepApplication wsi:Unimodal_Visual_Pretraining ;
+    wsi:hasStepApplication wsi:Vision_Language_Continual_Pretraining ;
+    wsi:hasStepApplication wsi:Linear_Probing_Evaluation ;
+    wsi:hasStepApplication wsi:K_NN_Probing_Evaluation ;
+    wsi:hasStepApplication wsi:Slide_Retrieval ;
+    wsi:hasStepApplication wsi:Cross_Modal_Retrieval ;
+    wsi:hasStepApplication wsi:Few_Shot_Classification ;
+    wsi:hasStepApplication wsi:Survival_Analysis ;
+    wsi:hasStepApplication wsi:Zero_Shot_Classification ;
+    wsi:hasStepApplication wsi:Report_Generation .
+
+wsi:Pretraining_Step_1 rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Unimodal_Visual_Pretraining ;
+    wsi:hasInputData wsi:Mass_340K_WSI_Dataset ;
+    wsi:hasOutputData wsi:Slide_Representation_Model_v ;
+    wsi:usesAlgorithm wsi:iBOT ;
+    wsi:nextStepApplication wsi:Synthetic_Caption_Generation .
+
+wsi:Synthetic_Caption_Generation rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Vision_Language_Continual_Pretraining ;
+    wsi:hasInputData wsi:8192x8192_ROI_Patches ;
+    wsi:hasOutputData wsi:Synthetic_Captions ;
+    wsi:usesAlgorithm wsi:PathChat ;
+    wsi:nextStepApplication wsi:Slide_Report_Curation .
+
+wsi:Slide_Report_Curation rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Vision_Language_Continual_Pretraining ;
+    wsi:hasInputData wsi:Slide_Report_Pairs ;
+    wsi:hasOutputData wsi:Cleaned_Report_Text ;
+    wsi:usesAlgorithm wsi:Qwen2_7B_Instruct ;
+    wsi:nextStepApplication wsi:Unimodal_Visual_Pretraining .
+
+wsi:Unimodal_Visual_Pretraining rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Unimodal_Visual_Pretraining ;
+    wsi:hasInputData wsi:Mass_340K_WSI_Dataset ;
+    wsi:hasOutputData wsi:Slide_Representation_Model_v ;
+    wsi:usesAlgorithm wsi:CONCHv1_5 ;
+    wsi:nextStepApplication wsi:Vision_Language_Continual_Pretraining .
+
+wsi:Vision_Language_Continual_Pretraining rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Vision_Language_Continual_Pretraining ;
+    wsi:hasInputData wsi:Cleaned_Report_Text ;
+    wsi:hasOutputData wsi:Vision_Language_Model_vcr ;
+    wsi:usesAlgorithm wsi:CoCa ;
+    wsi:nextStepApplication wsi:Linear_Probing_Evaluation .
+
+wsi:Linear_Probing_Evaluation rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Linear_Probing ;
+    wsi:hasInputData wsi:Slide_Representation_Model_vcr ;
+    wsi:hasOutputData wsi:Linear_Probing_Results ;
+    wsi:usesAlgorithm wsi:Logistic_Regression ;
+    wsi:nextStepApplication wsi:K_NN_Probing_Evaluation .
+
+wsi:K_NN_Probing_Evaluation rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:K_Nearest_Neighbor_Probing ;
+    wsi:hasInputData wsi:Slide_Representation_Model_vcr ;
+    wsi:hasOutputData wsi:K_NN_Probing_Results ;
+    wsi:usesAlgorithm wsi:K_NN ;
+    wsi:nextStepApplication wsi:Slide_Retrieval .
+
+wsi:Slide_Retrieval rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Slide_Retrieval ;
+    wsi:hasInputData wsi:Slide_Representation_Model_vcr ;
+    wsi:hasOutputData wsi:Retrieved_Slides ;
+    wsi:usesAlgorithm wsi:Euclidean_Distance ;
+    wsi:nextStepApplication wsi:Cross_Modal_Retrieval .
+
+wsi:Cross_Modal_Retrieval rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Cross_Modal_Retrieval ;
+    wsi:hasInputData wsi:Slide_Representation_Model_vcr ;
+    wsi:hasOutputData wsi:Cross_Modal_Retrieval_Results ;
+    wsi:usesAlgorithm wsi:Cosine_Similarity ;
+    wsi:nextStepApplication wsi:Few_Shot_Classification .
+
+wsi:Few_Shot_Classification rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Few_Shot_Classification ;
+    wsi:hasInputData wsi:Slide_Representation_Model_vcr ;
+    wsi:hasOutputData wsi:Few_Shot_Classification_Results ;
+    wsi:usesAlgorithm wsi:SimpleShot ;
+    wsi:nextStepApplication wsi:Survival_Analysis .
+
+wsi:Survival_Analysis rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Survival_Analysis ;
+    wsi:hasInputData wsi:Slide_Representation_Model_vcr ;
+    wsi:hasOutputData wsi:Survival_Prediction_Results ;
+    wsi:usesAlgorithm wsi:Cox_Proportional_Hazards ;
+    wsi:nextStepApplication wsi:Zero_Shot_Classification .
+
+wsi:Zero_Shot_Classification rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Zero_Shot_Classification ;
+    wsi:hasInputData wsi:Slide_Representation_Model_vcr ;
+    wsi:hasOutputData wsi:Zero_Shot_Classification_Results ;
+    wsi:usesAlgorithm wsi:CLIP_Similarity ;
+    wsi:nextStepApplication wsi:Report_Generation .
+
+wsi:Report_Generation rdf:type wsi:Step_Application ;
+    wsi:ofStep wsi:Report_Generation ;
+    wsi:hasInputData wsi:Slide_Representation_Model_vcr ;
+    wsi:hasOutputData wsi:Generated_Report_Text ;
+    wsi:usesAlgorithm wsi:Beam_Search_Decoding ;
+    wsi:nextStepApplication wsi:Linear_Probing_Evaluation .
+
+wsi:Unimodal_Visual_Pretraining rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Feature_Extraction .
+
+wsi:Vision_Language_Continual_Pretraining rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Aggregation .
+
+wsi:Linear_Probing rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Aggregation .
+
+wsi:K_Nearest_Neighbor_Probing rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Aggregation .
+
+wsi:Slide_Retrieval rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Aggregation .
+
+wsi:Cross_Modal_Retrieval rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Aggregation .
+
+wsi:Few_Shot_Classification rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Aggregation .
+
+wsi:Survival_Analysis rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Aggregation .
+
+wsi:Zero_Shot_Classification rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Aggregation .
+
+wsi:Report_Generation rdf:type wsi:WSI_Step ;
+    wsi:belongsToStage wsi:Stage_Aggregation .
+
+wsi:iBOT rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Epochs_270 ;
+    wsi:hasParameter wsi:Batch_Size_1024 ;
+    wsi:hasParameter wsi:Learning_Rate_1e-4 ;
+    wsi:hasParameter wsi:Weight_Decay_1e-4 ;
+    wsi:hasParameter wsi:Gradient_Accumulation_1 .
+
+wsi:PathChat rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Prompt_Detailed_Morphology ;
+    wsi:hasParameter wsi:Max_Tokens_2048 .
+
+wsi:Qwen2_7B_Instruct rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Prompt_Rewrite ;
+    wsi:hasParameter wsi:Temperature_0.7 .
+
+wsi:CONCHv1_5 rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Patch_Size_512 ;
+    wsi:hasParameter wsi:Feature_Dim_768 ;
+    wsi:hasParameter wsi:Training_Epochs_20 .
+
+wsi:CoCa rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Batch_Size_3136 ;
+    wsi:hasParameter wsi:Learning_Rate_1e-4 ;
+    wsi:hasParameter wsi:Weight_Decay_1e-4 ;
+    wsi:hasParameter wsi:Gradient_Accumulation_2 .
+
+wsi:Logistic_Regression rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Regularization_L2_1e-6_to_1e5 ;
+    wsi:hasParameter wsi:Max_Iterations_500 .
+
+wsi:K_NN rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:K_20 ;
+    wsi:hasParameter wsi:Distance_Metric_Euclidean .
+
+wsi:Euclidean_Distance rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Centering_Yes ;
+    wsi:hasParameter wsi:Normalization_L2 .
+
+wsi:Cosine_Similarity rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Normalization_L2 .
+
+wsi:SimpleShot rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Prototype_Averaging ;
+    wsi:hasParameter wsi:Distance_Metric_Euclidean .
+
+wsi:Cox_Proportional_Hazards rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Regularization_C_1e1_to_1e5 ;
+    wsi:hasParameter wsi:Cross_Validation_5_Folds .
+
+wsi:CLIP_Similarity rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Text_Prompt_Ensemble ;
+    wsi:hasParameter wsi:Cosine_Similarity .
+
+wsi:Beam_Search_Decoding rdf:type wsi:Algorithm ;
+    wsi:hasParameter wsi:Beam_Size_5 ;
+    wsi:hasParameter wsi:Beam_Group_1 .
+
+wsi:Mass_340K_WSI_Dataset rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:SVS .
+
+wsi:8192x8192_ROI_Patches rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:PNG .
+
+wsi:Slide_Report_Pairs rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:JSON .
+
+wsi:Slide_Representation_Model_v rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:Vision_Language_Model_vcr rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:H5 .
+
+wsi:Linear_Probing_Results rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:CSV .
+
+wsi:K_NN_Probing_Results rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:CSV .
+
+wsi:Retrieved_Slides rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:CSV .
+
+wsi:Cross_Modal_Retrieval_Results rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:CSV .
+
+wsi:Few_Shot_Classification_Results rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:CSV .
+
+wsi:Survival_Prediction_Results rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:CSV .
+
+wsi:Zero_Shot_Classification_Results rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:CSV .
+
+wsi:Generated_Report_Text rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:TXT .
+
+wsi:Synthetic_Captions rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:TXT .
+
+wsi:Cleaned_Report_Text rdf:type wsi:Data_Content ;
+    wsi:storedInFormat wsi:TXT .
+
+wsi:SVS rdf:type wsi:Data_Format .
+wsi:PNG rdf:type wsi:Data_Format .
+wsi:H5 rdf:type wsi:Data_Format .
+wsi:CSV rdf:type wsi:Data_Format .
+wsi:JSON rdf:type wsi:Data_Format .
+wsi:TXT rdf:type wsi:Data_Format .
+
+wsi:Epochs_270 rdf:type wsi:Parameter .
+wsi:Batch_Size_1024 rdf:type wsi:Parameter .
+wsi:Learning_Rate_1e-4 rdf:type wsi:Parameter .
+wsi:Weight_Decay_1e-4 rdf:type wsi:Parameter .
+wsi:Gradient_Accumulation_1 rdf:type wsi:Parameter .
+wsi:Prompt_Detailed_Morphology rdf:type wsi:Parameter .
+wsi:Max_Tokens_2048 rdf:type wsi:Parameter .
+wsi:Prompt_Rewrite rdf:type wsi:Parameter .
+wsi:Temperature_0.7 rdf:type wsi:Parameter .
+wsi:Patch_Size_512 rdf:type wsi:Parameter .
+wsi:Feature_Dim_768 rdf:type wsi:Parameter .
+wsi:Training_Epochs_20 rdf:type wsi:Parameter .
+wsi:Batch_Size_3136 rdf:type wsi:Parameter .
+wsi:Regularization_L2_1e-6_to_1e5 rdf:type wsi:Parameter .
+wsi:Max_Iterations_500 rdf:type wsi:Parameter .
+wsi:K_20 rdf:type wsi:Parameter .
+wsi:Distance_Metric_Euclidean rdf:type wsi:Parameter .
+wsi:Centering_Yes rdf:type wsi:Parameter .
+wsi:Normalization_L2 rdf:type wsi:Parameter .
+wsi:Text_Prompt_Ensemble rdf:type wsi:Parameter .
+wsi:Beam_Size_5 rdf:type wsi:Parameter .
+wsi:Beam_Group_1 rdf:type wsi:Parameter .
+wsi:Regularization_C_1e1_to_1e5 rdf:type wsi:Parameter .
+wsi:Cross_Validation_5_Folds rdf:type wsi:Parameter .

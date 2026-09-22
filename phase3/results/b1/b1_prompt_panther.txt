@@ -1,0 +1,165 @@
+wsi:Research_Paper_ours rdf:type wsi:Research_Paper ;
+    wsi:has_start_of_Methodology wsi:Application_of_Step_1 .
+
+wsi:Application_of_Step_1 rdf:type wsi:Application_of_Step ;
+    wsi:applies_step wsi:WSI_Patching ;
+    wsi:applies_to wsi:Research_Paper_ours ;
+    wsi:has_shared_WSI_processing_step wsi:WSI_Patching .
+
+wsi:Application_of_Step_2 rdf:type wsi:Application_of_Step ;
+    wsi:applies_step wsi:Feature_Extraction ;
+    wsi:applies_to wsi:Research_Paper_ours ;
+    wsi:has_shared_WSI_processing_step wsi:Feature_Extraction .
+
+wsi:Application_of_Step_3 rdf:type wsi:Application_of_Step ;
+    wsi:applies_step wsi:Prototype_Based_Aggregation ;
+    wsi:applies_to wsi:Research_Paper_ours ;
+    wsi:has_shared_WSI_processing_step wsi:Prototype_Based_Aggregation .
+
+wsi:Application_of_Step_4 rdf:type wsi:Application_of_Step ;
+    wsi:applies_step wsi:Downstream_Prediction ;
+    wsi:applies_to wsi:Research_Paper_ours ;
+    wsi:has_shared_WSI_processing_step wsi:Downstream_Prediction .
+
+wsi:Application_of_Step_5 rdf:type wsi:Application_of_Step ;
+    wsi:applies_step wsi:Interpretability ;
+    wsi:applies_to wsi:Research_Paper_ours ;
+    wsi:has_shared_WSI_processing_step wsi:Interpretability .
+
+wsi:WSI_Patching rdf:type wsi:WSI_Processing_Step ;
+    wsi:has_stage wsi:Preprocessing ;
+    wsi:has_description "Tessellate whole-slide image into small non-overlapping patches." .
+
+wsi:Feature_Extraction rdf:type wsi:WSI_Processing_Step ;
+    wsi:has_stage wsi:Feature_Extraction ;
+    wsi:has_description "Extract compressed embeddings from each patch using a pretrained feature extractor." .
+
+wsi:Prototype_Based_Aggregation rdf:type wsi:WSI_Processing_Step ;
+    wsi:has_stage wsi:Aggregation ;
+    wsi:has_description "Use Gaussian Mixture Model to estimate mixture parameters and construct slide representation via EM algorithm." .
+
+wsi:Downstream_Prediction rdf:type wsi:WSI_Processing_Step ;
+    wsi:has_stage wsi:Downstream_Tasks ;
+    wsi:has_description "Use slide representation as input to predictor module for clinical tasks such as subtyping and survival prediction." .
+
+wsi:Interpretability rdf:type wsi:WSI_Processing_Step ;
+    wsi:has_stage wsi:Interpretability ;
+    wsi:has_description "Generate prototypical assignment maps and visualize morphological similarity using posterior probabilities." .
+
+wsi:Algorithm_GMM rdf:type wsi:Algorithm ;
+    wsi:has_name "Gaussian Mixture Model" ;
+    wsi:has_description "Probabilistic model assuming each patch embedding is generated from a mixture of components, each representing a morphological prototype." .
+
+wsi:Algorithm_EM rdf:type wsi:Algorithm ;
+    wsi:has_name "Expectation-Maximization" ;
+    wsi:has_description "Iterative algorithm used to estimate GMM parameters by maximizing log-likelihood." .
+
+wsi:Parameter_C rdf:type wsi:Parameter ;
+    wsi:has_name "Number of Prototypes" ;
+    wsi:has_value "8 to 32" ;
+    wsi:applies_to wsi:Algorithm_GMM .
+
+wsi:Parameter_d rdf:type wsi:Parameter ;
+    wsi:has_name "Embedding Dimension" ;
+    wsi:has_value "d" ;
+    wsi:applies_to wsi:Algorithm_GMM .
+
+wsi:Parameter_M rdf:type wsi:Parameter ;
+    wsi:has_name "Dimension of Aggregated Prototype Embedding" ;
+    wsi:has_value "1 + 2d" ;
+    wsi:applies_to wsi:Algorithm_GMM .
+
+wsi:Parameter_N_j rdf:type wsi:Parameter ;
+    wsi:has_name "Number of Patches per WSI" ;
+    wsi:has_value "10,000 to 20,000" ;
+    wsi:applies_to wsi:Algorithm_GMM .
+
+wsi:Parameter_pi_c_j rdf:type wsi:Parameter ;
+    wsi:has_name "Mixture Probability" ;
+    wsi:has_value "Estimated via EM" ;
+    wsi:applies_to wsi:Algorithm_GMM .
+
+wsi:Parameter_mu_c_j rdf:type wsi:Parameter ;
+    wsi:has_name "Mean of Mixture Component" ;
+    wsi:has_value "Estimated via EM" ;
+    wsi:applies_to wsi:Algorithm_GMM .
+
+wsi:Parameter_Sigma_c_j rdf:type wsi:Parameter ;
+    wsi:has_name "Covariance of Mixture Component" ;
+    wsi:has_value "Diagonal matrix estimated via EM" ;
+    wsi:applies_to wsi:Algorithm_GMM .
+
+wsi:Parameter_initialization_h_c rdf:type wsi:Parameter ;
+    wsi:has_name "Prototype Initialization" ;
+    wsi:has_value "K-means clustering on aggregated training patch embeddings" ;
+    wsi:applies_to wsi:Algorithm_GMM .
+
+wsi:Parameter_initialization_pi_c_0 rdf:type wsi:Parameter ;
+    wsi:has_name "Initial Mixture Probability" ;
+    wsi:has_value "1/C" ;
+    wsi:applies_to wsi:Algorithm_GMM .
+
+wsi:Parameter_initialization_mu_c_0 rdf:type wsi:Parameter ;
+    wsi:has_name "Initial Mean" ;
+    wsi:has_value "Prototype vector h_c" ;
+    wsi:applies_to wsi:Algorithm_GMM .
+
+wsi:Parameter_initialization_Sigma_c_0 rdf:type wsi:Parameter ;
+    wsi:has_name "Initial Covariance" ;
+    wsi:has_value "Identity matrix I" ;
+    wsi:applies_to wsi:Algorithm_GMM .
+
+wsi:Parameter_EM_iterations rdf:type wsi:Parameter ;
+    wsi:has_name "EM Iterations" ;
+    wsi:has_value "Single step sufficient for convergence" ;
+    wsi:applies_to wsi:Algorithm_EM .
+
+wsi:Parameter_feature_extractor rdf:type wsi:Parameter ;
+    wsi:has_name "Feature Extractor" ;
+    wsi:has_value "UNI (ViT-L/16 DINOv2 pretrained on 10^8 histology patches)" ;
+    wsi:applies_to wsi:Feature_Extraction .
+
+wsi:Parameter_patch_size rdf:type wsi:Parameter ;
+    wsi:has_name "Patch Size" ;
+    wsi:has_value "256 × 256 pixels" ;
+    wsi:applies_to wsi:WSI_Patching .
+
+wsi:Parameter_magnification rdf:type wsi:Parameter ;
+    wsi:has_name "Magnification Level" ;
+    wsi:has_value "20×" ;
+    wsi:applies_to wsi:WSI_Patching .
+
+wsi:Parameter_sampling_strategy rdf:type wsi:Parameter ;
+    wsi:has_name "Sampling Strategy" ;
+    wsi:has_value "All patches used, no sampling" ;
+    wsi:applies_to wsi:WSI_Patching .
+
+wsi:Parameter_prototype_set rdf:type wsi:Parameter ;
+    wsi:has_name "Shared Prototype Set" ;
+    wsi:has_value "Constructed via K-means on training cohort" ;
+    wsi:applies_to wsi:Prototype_Based_Aggregation .
+
+wsi:Parameter_slide_representation_size rdf:type wsi:Parameter ;
+    wsi:has_name "Slide Representation Dimension" ;
+    wsi:has_value "C × (1 + 2d)" ;
+    wsi:applies_to wsi:Prototype_Based_Aggregation .
+
+wsi:Parameter_predictor_head rdf:type wsi:Parameter ;
+    wsi:has_name "Predictor Head" ;
+    wsi:has_value "Linear layer or structured MLP" ;
+    wsi:applies_to wsi:Downstream_Prediction .
+
+wsi:Parameter_structured_MLP rdf:type wsi:Parameter ;
+    wsi:has_name "Structured MLP" ;
+    wsi:has_value "Per-prototype nonlinear mapping followed by global prediction" ;
+    wsi:applies_to wsi:Downstream_Prediction .
+
+wsi:Parameter_interpretability_map rdf:type wsi:Parameter ;
+    wsi:has_name "Interpretability Map" ;
+    wsi:has_value "Prototypical assignment map based on argmax of posterior" ;
+    wsi:applies_to wsi:Interpretability .
+
+wsi:Parameter_similarity_map rdf:type wsi:Parameter ;
+    wsi:has_name "Similarity Map" ;
+    wsi:has_value "Visualization of posterior probability q(c_n^j = c' | z_n^j)" ;
+    wsi:applies_to wsi:Interpretability .
